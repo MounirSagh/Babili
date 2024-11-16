@@ -2,6 +2,7 @@
 import { Request, Response } from 'express';
 import Category from '../models/category.model';
 import Product from '../models/product.model';
+import SubCategory from '../models/subcategory.model';
 
 // Create a new category
 export const createProduct = async (req: Request, res: Response) => {
@@ -28,8 +29,9 @@ export const getProducts = async (req: Request, res: Response) => {
 // Get a single category by ID
 export const getProductsByCategory = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { categoryID } = req.params;  // assuming categoryID is passed as a route parameter
-        const products = await Product.find({ categoryID });  // filter products by categoryID
+        const { id } = req.params;  // assuming categoryID is passed as a route parameter
+        console.log(id)
+        const products = await Product.find({ subcategoryID: id} );  // filter products by categoryID
         
         if (!products || products.length === 0) {
             res.status(404).json({ message: 'No products found for this category' });

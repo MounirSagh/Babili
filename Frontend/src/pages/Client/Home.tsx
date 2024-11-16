@@ -40,15 +40,6 @@ export default function Component() {
     }
   };
 
-  const Addtocart = async (product: Product) => {
-    try {
-      const response = await axios.post('http://localhost:5000/api/cart/additemtocart', product);
-      console.log(response)
-      alert("Item added to cart")
-    } catch (error) {
-      console.error('Error fetching categories:', error);
-    } 
-  }
 
   useEffect(() => {
     fetchCategories();

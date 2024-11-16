@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Plus, Pencil, Trash2, Search, Tag } from 'lucide-react';
+import { Plus, Pencil, Trash2 } from 'lucide-react';
 import LeftSideBar from "@/components/SideBar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -24,31 +24,34 @@ import {
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 
-// Define the Category type
+// Define Types
 interface Category {
   _id: string;
   name: string;
-  description: string;
+}
+
+interface SubCategory {
+  _id: string;
+  name: string;
+  categoryID: string;
   productCount: number;
 }
 
-export default function CategoryPage() {
+export default function SubCategoryPage() {
   const [categories, setCategories] = useState<Category[]>([]);
+  const [subCategories, setSubCategories] = useState<SubCategory[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [currentCategory, setCurrentCategory] = useState<Category | null>(null);
+  const [currentSubCategory, setCurrentSubCategory] = useState<Partial<SubCategory> | null>(null);
 
-  // Fetch categories from backend
+  // Fetch all categories and subcategories
   const fetchCategories = async () => {
     try {
       const response = await axios.get('http://localhost:5000/api/categories/getcategories');
@@ -58,42 +61,84 @@ export default function CategoryPage() {
     }
   };
 
+  const fetchSubCategories = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/api/subcategories/getsubcategories');
+      const enrichedSubCategories = await Promise.all(
+        response.data.map(async (subcategory: SubCategory) => {
+          const productCount = await getProductCountBySubCategory(subcategory._id);
+          return { ...subcategory, productCount };
+        })
+      );
+      setSubCategories(enrichedSubCategories);
+    } catch (error) {
+      console.error('Error fetching subcategories:', error);
+    }
+  };
+
+  const getProductCountBySubCategory = async (subcategoryID: string): Promise<number> => {
+    try {
+      console.log("hhh", subcategoryID)
+      const response = await axios.get(
+        `http://localhost:5000/api/product/getproductsbycategory/${subcategoryID}`
+      );
+      return response.data.length || 0;
+    } catch (error) {
+      console.error('Error fetching product count:', error);
+      return 0;
+    }
+  };
+
   useEffect(() => {
     fetchCategories();
+    fetchSubCategories();
   }, []);
 
-  const handleAddCategory = async (newCategory: Omit<Category, '_id' | 'productCount'>) => {
+  const handleAddSubCategory = async (newSubCategory: Partial<SubCategory>) => {
     try {
-      const response = await axios.post('http://localhost:5000/api/categories/addcategory', newCategory);
-      setCategories([...categories, response.data]);
+      const response = await axios.post(
+        'http://localhost:5000/api/subcategories/addsubcategory',
+        newSubCategory
+      );
+      setSubCategories([...subCategories, { ...response.data, productCount: 0 }]);
       setIsDialogOpen(false);
     } catch (error) {
-      console.error('Error adding category:', error);
+      console.error('Error adding subcategory:', error);
     }
   };
 
-  const handleUpdateCategory = async (updatedCategory: Category) => {
+  const handleUpdateSubCategory = async (updatedSubCategory: SubCategory) => {
     try {
-      const response = await axios.put(`http://localhost:5000/api/categories/updatecategory/${updatedCategory._id}`, updatedCategory);
-      setCategories(categories.map((c) => (c._id === updatedCategory._id ? response.data : c)));
+      const response = await axios.put(
+        `http://localhost:5000/api/subcategories/updatesubcategory/${updatedSubCategory._id}`,
+        updatedSubCategory
+      );
+      setSubCategories(
+        subCategories.map((sc) =>
+          sc._id === updatedSubCategory._id ? { ...response.data, productCount: sc.productCount } : sc
+        )
+      );
       setIsDialogOpen(false);
     } catch (error) {
-      console.error('Error updating category:', error);
+      console.error('Error updating subcategory:', error);
     }
   };
 
-  const handleDeleteCategory = async (id: string) => {
+  const handleDeleteSubCategory = async (subcategoryID: string) => {
     try {
-      await axios.delete(`http://localhost:5000/api/categories/deletecategory/${id}`);
-      setCategories(categories.filter((c) => c._id !== id));
+      await axios.delete(`http://localhost:5000/api/subcategories/deletesubcategories/${subcategoryID}`);
+      setSubCategories(subCategories.filter((sc) => sc._id !== subcategoryID));
     } catch (error) {
-      console.error('Error deleting category:', error);
+      console.error('Error deleting subcategory:', error);
     }
   };
 
-  const filteredCategories = categories.filter((category) =>
-    category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    category.description.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredSubCategories = subCategories.filter(
+    (subcategory) =>
+      subcategory.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      categories.find((cat) => cat._id === subcategory.categoryID)?.name
+        ?.toLowerCase()
+        .includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -101,38 +146,38 @@ export default function CategoryPage() {
       <LeftSideBar />
       <div className="flex-1 flex flex-col overflow-hidden">
         <header className="flex items-center justify-between px-6 py-4 border-b">
-          <h1 className="text-2xl font-bold">Category Management</h1>
+          <h1 className="text-2xl font-bold">SubCategory Management</h1>
           <div className="flex items-center space-x-4">
             <form onSubmit={(e) => e.preventDefault()} className="relative">
-              <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 type="search"
-                placeholder="Search categories..."
-                className="pl-8 w-64"
+                placeholder="Search subcategories..."
+                className="w-64"
                 value={searchQuery}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
               />
             </form>
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
-                <Button onClick={() => setCurrentCategory(null)}>
-                  <Plus className="mr-2 h-4 w-4" /> Add Category
+                <Button onClick={() => setCurrentSubCategory(null)}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add SubCategory
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px]">
+              <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>{currentCategory ? 'Edit Category' : 'Add New Category'}</DialogTitle>
-                  <DialogDescription>
-                    {currentCategory ? 'Make changes to the category here.' : 'Add the details of the new category here.'}
-                  </DialogDescription>
+                  <DialogTitle>
+                    {currentSubCategory ? 'Edit SubCategory' : 'Add SubCategory'}
+                  </DialogTitle>
                 </DialogHeader>
-                <CategoryForm
-                  initialData={currentCategory}
+                <SubCategoryForm
+                  categories={categories}
+                  initialData={currentSubCategory}
                   onSubmit={(data) => {
-                    if (currentCategory) {
-                      handleUpdateCategory({ ...currentCategory, ...data } as Category);
+                    if (currentSubCategory) {
+                      handleUpdateSubCategory({ ...currentSubCategory, ...data } as SubCategory);
                     } else {
-                      handleAddCategory(data as Omit<Category, '_id' | 'productCount'>);
+                      handleAddSubCategory(data);
                     }
                   }}
                 />
@@ -143,52 +188,48 @@ export default function CategoryPage() {
         <main className="flex-1 overflow-y-auto p-6">
           <Card>
             <CardHeader>
-              <CardTitle>Category List</CardTitle>
-              <CardDescription>Manage your product categories</CardDescription>
+              <CardTitle>SubCategory List</CardTitle>
+              <CardDescription>Manage your subcategories</CardDescription>
             </CardHeader>
             <CardContent>
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Name</TableHead>
-                    <TableHead>Description</TableHead>
+                    <TableHead>Category</TableHead>
                     <TableHead>Products</TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredCategories.map((category) => (
-                    <TableRow key={category._id}>
+                  {filteredSubCategories.map((subcategory) => (
+                    <TableRow key={subcategory._id}>
+                      <TableCell>{subcategory.name}</TableCell>
                       <TableCell>
-                        <div className="flex items-center">
-                          <Tag className="mr-2 h-4 w-4" />
-                          {category.name}
-                        </div>
+                        {
+                          categories.find((category) => category._id === subcategory.categoryID)
+                            ?.name || 'Unknown'
+                        }
                       </TableCell>
-                      <TableCell>{category.description}</TableCell>
+                      <TableCell>{subcategory.productCount}</TableCell>
                       <TableCell>
-                        <Badge variant="secondary">{category.productCount}</Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex space-x-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              setCurrentCategory(category);
-                              setIsDialogOpen(true);
-                            }}
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleDeleteCategory(category._id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setCurrentSubCategory(subcategory);
+                            setIsDialogOpen(true);
+                          }}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDeleteSubCategory(subcategory._id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -202,18 +243,19 @@ export default function CategoryPage() {
   );
 }
 
-// Define CategoryFormProps with a unified type for onSubmit
-interface CategoryFormProps {
-  initialData: Partial<Omit<Category, 'productCount'>> | null;
-  onSubmit: (data: Partial<Omit<Category, '_id' | 'productCount'>>) => void;
+// Form Component
+interface SubCategoryFormProps {
+  categories: Category[];
+  initialData: Partial<SubCategory> | null;
+  onSubmit: (data: Partial<SubCategory>) => void;
 }
 
-function CategoryForm({ initialData, onSubmit }: CategoryFormProps) {
-  const [formData, setFormData] = useState<Partial<Omit<Category, '_id' | 'productCount'>>>(
-    initialData || { name: '', description: '' }
+function SubCategoryForm({ categories, initialData, onSubmit }: SubCategoryFormProps) {
+  const [formData, setFormData] = useState<Partial<SubCategory>>(
+    initialData || { name: '', categoryID: '' }
   );
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
@@ -226,35 +268,38 @@ function CategoryForm({ initialData, onSubmit }: CategoryFormProps) {
   return (
     <form onSubmit={handleSubmit}>
       <div className="grid gap-4 py-4">
-        <div className="grid grid-cols-4 items-center gap-4">
-          <Label htmlFor="name" className="text-right">
-            Name
-          </Label>
+        <div>
+          <Label htmlFor="name">SubCategory Name</Label>
           <Input
             id="name"
             name="name"
             value={formData.name || ''}
             onChange={handleChange}
-            className="col-span-3"
             required
           />
         </div>
-        <div className="grid grid-cols-4 items-center gap-4">
-          <Label htmlFor="description" className="text-right">
-            Description
-          </Label>
-          <Textarea
-            id="description"
-            name="description"
-            value={formData.description || ''}
+        <div>
+          <Label htmlFor="categoryID">Category</Label>
+          <select
+            id="categoryID"
+            name="categoryID"
+            value={formData.categoryID || ''}
             onChange={handleChange}
-            className="col-span-3"
-            rows={3}
-          />
+            required
+          >
+            <option value="" disabled>
+              Select a Category
+            </option>
+            {categories.map((category) => (
+              <option key={category._id} value={category._id}>
+                {category.name}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
       <DialogFooter>
-        <Button type="submit">{initialData ? 'Update Category' : 'Add Category'}</Button>
+        <Button type="submit">{initialData ? 'Update SubCategory' : 'Add SubCategory'}</Button>
       </DialogFooter>
     </form>
   );

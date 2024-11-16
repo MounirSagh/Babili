@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { MinusCircle, PlusCircle } from 'lucide-react'
 import NavBar from '@/components/NavBar'
 import axios from 'axios'
+import { useNavigate } from 'react-router-dom'
 
 type CartItem = {
   _id: number
@@ -18,6 +18,7 @@ type CartItem = {
 }
 
 export default function Component() {
+  const navigate = useNavigate();
   const [cartItems, setCartItems] = useState<CartItem[]>([])
   const fetchCart = async () => {
     try {
@@ -135,7 +136,7 @@ export default function Component() {
             <div className="p-8 md:p-10 flex flex-col md:flex-row items-center justify-center">
 
               <div className="flex items-center text-center justify-center md:justify-end w-full md:w-auto">
-                <Button className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-lg py-3 px-10 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105">
+                <Button onClick={() => navigate('/Order')} className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-lg py-3 px-10 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105">
                   Proceed to Ordering
                 </Button>
               </div>

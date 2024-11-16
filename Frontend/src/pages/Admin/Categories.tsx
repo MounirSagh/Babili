@@ -42,24 +42,51 @@ interface Category {
   productCount: number;
 }
 
+
+interface SubCategory {
+  _id: string;
+  name: string;
+  description: string;
+  categoryID: string;
+}
+
 export default function CategoryPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [currentCategory, setCurrentCategory] = useState<Category | null>(null);
+  const [subCategories, setSubCategories] = useState<Record<string, SubCategory[]>>({});
 
-  // Fetch categories from backend
-  const fetchCategories = async () => {
+  // Fetch categories and their subcategories
+  const fetchCategoriesWithSubCategories = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/categories/getcategories');
-      setCategories(response.data);
+      const categoryResponse = await axios.get('http://localhost:5000/api/categories/getcategories');
+      const fetchedCategories = categoryResponse.data;
+
+      // Fetch subcategories for each category
+      const subCategoryPromises = fetchedCategories.map((category: Category) =>
+        axios
+          .get(`http://localhost:5000/api/subcategories/getsubcategorybycategory/${category._id}`)
+          .then((res) => ({ categoryID: category._id, subCategories: res.data }))
+      );
+
+      const subCategoryResults = await Promise.all(subCategoryPromises);
+
+      // Map subcategories by categoryID
+      const subCategoryMap = subCategoryResults.reduce(
+        (acc, result) => ({ ...acc, [result.categoryID]: result.subCategories }),
+        {}
+      );
+
+      setCategories(fetchedCategories);
+      setSubCategories(subCategoryMap);
     } catch (error) {
-      console.error('Error fetching categories:', error);
+      console.error('Error fetching categories or subcategories:', error);
     }
   };
 
   useEffect(() => {
-    fetchCategories();
+    fetchCategoriesWithSubCategories();
   }, []);
 
   const handleAddCategory = async (newCategory: Omit<Category, '_id' | 'productCount'>) => {
@@ -152,7 +179,7 @@ export default function CategoryPage() {
                   <TableRow>
                     <TableHead>Name</TableHead>
                     <TableHead>Description</TableHead>
-                    <TableHead>Products</TableHead>
+                    <TableHead>Subategories</TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -167,7 +194,7 @@ export default function CategoryPage() {
                       </TableCell>
                       <TableCell>{category.description}</TableCell>
                       <TableCell>
-                        <Badge variant="secondary">{category.productCount}</Badge>
+                        <Badge variant="secondary"> {subCategories[category._id]?.length || 0}</Badge>
                       </TableCell>
                       <TableCell>
                         <div className="flex space-x-2">
@@ -259,3 +286,4 @@ function CategoryForm({ initialData, onSubmit }: CategoryFormProps) {
     </form>
   );
 }
+

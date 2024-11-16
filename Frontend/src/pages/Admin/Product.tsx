@@ -1,17 +1,18 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Plus, Pencil, Trash2, Search } from 'lucide-react'
-import LeftSideBar from "@/components/SideBar"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { Plus, Pencil, Trash2 } from 'lucide-react';
+import LeftSideBar from "@/components/SideBar";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -19,51 +20,104 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@/components/ui/table";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
+} from "@/components/ui/dialog";
 
-// Sample product data
-const initialProducts = [
-  { id: 1, name: 'Product A', category: 'Electronics', price: 299.99, stock: 50 },
-  { id: 2, name: 'Product B', category: 'Clothing', price: 49.99, stock: 100 },
-  { id: 3, name: 'Product C', category: 'Home & Garden', price: 129.99, stock: 30 },
-  { id: 4, name: 'Product D', category: 'Electronics', price: 599.99, stock: 20 },
-  { id: 5, name: 'Product E', category: 'Clothing', price: 79.99, stock: 80 },
-]
+// Define Types
+interface SubCategory {
+  _id: string;
+  name: string;
+}
+
+interface Product {
+  _id?: string;
+  REF: string;
+  Poitrine: string;
+  Poids: string;
+  Flottabilité: string;
+  TYPE: string;
+  subcategoryID: string;
+}
 
 export default function ProductPage() {
-  const [products, setProducts] = useState(initialProducts)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [currentProduct, setCurrentProduct] = useState(null)
+  const [subCategories, setSubCategories] = useState<SubCategory[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [currentProduct, setCurrentProduct] = useState<Partial<Product> | null>(null);
 
-  const filteredProducts = products.filter(product =>
-    product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    product.category.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  // Fetch all subcategories and products
+  const fetchSubCategories = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/api/subcategories/getsubcategories');
+      setSubCategories(response.data);
+    } catch (error) {
+      console.error('Error fetching subcategories:', error);
+    }
+  };
 
-  const handleAddProduct = (newProduct: any) => {
-    setProducts([...products, { ...newProduct, id: products.length + 1 }])
-    setIsDialogOpen(false)
-  }
+  const fetchProducts = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/api/product/getproducts');
+      setProducts(response.data);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+    }
+  };
 
-  const handleUpdateProduct = (updatedProduct: any) => {
-    setProducts(products.map(p => p.id === updatedProduct.id ? updatedProduct : p))
-    setIsDialogOpen(false)
-  }
+  useEffect(() => {
+    fetchSubCategories();
+    fetchProducts();
+  }, []);
 
-  const handleDeleteProduct = (id: any) => {
-    setProducts(products.filter(p => p.id !== id))
-  }
+  const handleAddProduct = async (newProduct: Product) => {
+    try {
+      const response = await axios.post('http://localhost:5000/api/product/addproduct', newProduct);
+      setProducts([...products, response.data]);
+      setIsDialogOpen(false);
+    } catch (error) {
+      console.error('Error adding product:', error);
+    }
+  };
+
+  const handleUpdateProduct = async (updatedProduct: Product) => {
+    try {
+      const response = await axios.put(
+        `http://localhost:5000/api/product/updateproduct/${updatedProduct._id}`,
+        updatedProduct
+      );
+      setProducts(
+        products.map((p) => (p._id === updatedProduct._id ? response.data : p))
+      );
+      setIsDialogOpen(false);
+    } catch (error) {
+      console.error('Error updating product:', error);
+    }
+  };
+
+  const handleDeleteProduct = async (productID: string) => {
+    try {
+      await axios.delete(`http://localhost:5000/api/product/deleteproduct/${productID}`);
+      setProducts(products.filter((p) => p._id !== productID));
+    } catch (error) {
+      console.error('Error deleting product:', error);
+    }
+  };
+
+  const filteredProducts = products.filter(
+    (product) =>
+      product.REF.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      subCategories.find((sc) => sc._id === product.subcategoryID)?.name
+        ?.toLowerCase()
+        .includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div className="flex h-screen bg-background">
@@ -73,31 +127,39 @@ export default function ProductPage() {
           <h1 className="text-2xl font-bold">Product Management</h1>
           <div className="flex items-center space-x-4">
             <form onSubmit={(e) => e.preventDefault()} className="relative">
-              <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 type="search"
                 placeholder="Search products..."
-                className="pl-8 w-64"
+                className="w-64"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setSearchQuery(e.target.value)
+                }
               />
             </form>
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
                 <Button onClick={() => setCurrentProduct(null)}>
-                  <Plus className="mr-2 h-4 w-4" /> Add Product
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Product
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px]">
+              <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>{currentProduct ? 'Edit Product' : 'Add New Product'}</DialogTitle>
-                  <DialogDescription>
-                    {currentProduct ? 'Make changes to the product here.' : 'Add the details of the new product here.'}
-                  </DialogDescription>
+                  <DialogTitle>
+                    {currentProduct ? 'Edit Product' : 'Add Product'}
+                  </DialogTitle>
                 </DialogHeader>
                 <ProductForm
+                  subCategories={subCategories}
                   initialData={currentProduct}
-                  onSubmit={currentProduct ? handleUpdateProduct : handleAddProduct}
+                  onSubmit={(data) => {
+                    if (currentProduct) {
+                      handleUpdateProduct({ ...currentProduct, ...data } as Product);
+                    } else {
+                      handleAddProduct(data as Product);
+                    }
+                  }}
                 />
               </DialogContent>
             </Dialog>
@@ -107,46 +169,53 @@ export default function ProductPage() {
           <Card>
             <CardHeader>
               <CardTitle>Product List</CardTitle>
-              <CardDescription>Manage your product inventory</CardDescription>
+              <CardDescription>Manage your products</CardDescription>
             </CardHeader>
             <CardContent>
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Category</TableHead>
-                    <TableHead>Price</TableHead>
-                    <TableHead>Stock</TableHead>
+                    <TableHead>REF</TableHead>
+                    <TableHead>Poitrine</TableHead>
+                    <TableHead>Poids</TableHead>
+                    <TableHead>Flottabilité</TableHead>
+                    <TableHead>TYPE</TableHead>
+                    <TableHead>SubCategory</TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredProducts.map((product : any) => (
-                    <TableRow key={product.id}>
-                      <TableCell>{product.name}</TableCell>
-                      <TableCell>{product.category}</TableCell>
-                      <TableCell>${product.price.toFixed(2)}</TableCell>
-                      <TableCell>{product.stock}</TableCell>
+                  {filteredProducts.map((product) => (
+                    <TableRow key={product._id}>
+                      <TableCell>{product.REF}</TableCell>
+                      <TableCell>{product.Poitrine}</TableCell>
+                      <TableCell>{product.Poids}</TableCell>
+                      <TableCell>{product.Flottabilité}</TableCell>
+                      <TableCell>{product.TYPE}</TableCell>
                       <TableCell>
-                        <div className="flex space-x-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              setCurrentProduct(product)
-                              setIsDialogOpen(true)
-                            }}
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleDeleteProduct(product.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
+                        {
+                          subCategories.find((sc) => sc._id === product.subcategoryID)
+                            ?.name || 'Unknown'
+                        }
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setCurrentProduct(product);
+                            setIsDialogOpen(true);
+                          }}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDeleteProduct(product._id!)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -157,95 +226,101 @@ export default function ProductPage() {
         </main>
       </div>
     </div>
-  )
+  );
 }
 
-function ProductForm({ initialData, onSubmit }: any) {
-  const [formData, setFormData] = useState(initialData || {
-    name: '',
-    category: '',
-    price: '',
-    stock: ''
-  })
+// Form Component
+interface ProductFormProps {
+  subCategories: SubCategory[];
+  initialData: Partial<Product> | null;
+  onSubmit: (data: Partial<Product>) => void;
+}
 
-  const handleChange = (e: any) => {
-    const { name, value } = e.target
-    setFormData((prev: any) => ({ ...prev, [name]: value }))
-  }
+function ProductForm({ subCategories, initialData, onSubmit }: ProductFormProps) {
+  const [formData, setFormData] = useState<Partial<Product>>(
+    initialData || {
+      REF: '',
+      Poitrine: '',
+      Poids: '',
+      Flottabilité: '',
+      TYPE: '',
+      subcategoryID: '',
+    }
+  );
 
-  const handleSubmit = (e: any) => {
-    e.preventDefault()
-    onSubmit({
-      ...formData,
-      price: parseFloat(formData.price),
-      stock: parseInt(formData.stock, 10)
-    })
-  }
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit(formData);
+  };
 
   return (
     <form onSubmit={handleSubmit}>
       <div className="grid gap-4 py-4">
-        <div className="grid grid-cols-4 items-center gap-4">
-          <Label htmlFor="name" className="text-right">
-            Name
-          </Label>
-          <Input
-            id="name"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            className="col-span-3"
-            required
-          />
-        </div>
-        <div className="grid grid-cols-4 items-center gap-4">
-          <Label htmlFor="category" className="text-right">
-            Category
-          </Label>
-          <Input
-            id="category"
-            name="category"
-            value={formData.category}
-            onChange={handleChange}
-            className="col-span-3"
-            required
-          />
-        </div>
-        <div className="grid grid-cols-4 items-center gap-4">
-          <Label htmlFor="price" className="text-right">
-            Price
-          </Label>
-          <Input
-            id="price"
-            name="price"
-            type="number"
-            value={formData.price}
-            onChange={handleChange}
-            className="col-span-3"
-            required
-            min="0"
-            step="0.01"
-          />
-        </div>
-        <div className="grid grid-cols-4 items-center gap-4">
-          <Label htmlFor="stock" className="text-right">
-            Stock
-          </Label>
-          <Input
-            id="stock"
-            name="stock"
-            type="number"
-            value={formData.stock}
-            onChange={handleChange}
-            className="col-span-3"
-            required
-            min="0"
-          />
-        </div>
+        <Input
+          id="REF"
+          name="REF"
+          placeholder="Product REF"
+          value={formData.REF || ''}
+          onChange={handleChange}
+          required
+        />
+        <Input
+          id="Poitrine"
+          name="Poitrine"
+          placeholder="Poitrine"
+          value={formData.Poitrine || ''}
+          onChange={handleChange}
+          required
+        />
+        <Input
+          id="Poids"
+          name="Poids"
+          placeholder="Poids"
+          value={formData.Poids || ''}
+          onChange={handleChange}
+          required
+        />
+        <Input
+          id="Flottabilité"
+          name="Flottabilité"
+          placeholder="Flottabilité"
+          value={formData.Flottabilité || ''}
+          onChange={handleChange}
+          required
+        />
+        <Input
+          id="TYPE"
+          name="TYPE"
+          placeholder="TYPE"
+          value={formData.TYPE || ''}
+          onChange={handleChange}
+          required
+        />
+        <select
+          id="subcategoryID"
+          name="subcategoryID"
+          value={formData.subcategoryID || ''}
+          onChange={handleChange}
+          required
+        >
+          <option value="" disabled>
+            Select a SubCategory
+          </option>
+          {subCategories.map((subcategory) => (
+            <option key={subcategory._id} value={subcategory._id}>
+              {subcategory.name}
+            </option>
+          ))}
+        </select>
       </div>
       <DialogFooter>
         <Button type="submit">{initialData ? 'Update Product' : 'Add Product'}</Button>
       </DialogFooter>
     </form>
-  )
+  );
 }

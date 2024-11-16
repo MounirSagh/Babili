@@ -39,19 +39,15 @@ export const getSubCategoryById = async (req: Request, res: Response): Promise<v
 };
 
 // Get a single category by ID
-export const getSubCategorybycategory= async (req: Request, res: Response): Promise<void> => {
+export const getSubCategorybycategory = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { categoryID } = req.params;
-        const subcategory = await SubCategory.find({categoryID});
-        if (!subcategory) {
-            res.status(404).json({ message: 'Category not found' });
-        } else {
-            res.status(200).json(subcategory);
-        }
+      const { id } = req.params;
+      const subcategories = await SubCategory.find({ categoryID: id });
+      res.status(200).json(subcategories);
     } catch (error) {
-        res.status(500).json({ message: 'Error fetching category', error });
+      res.status(500).json({ message: 'Error fetching subcategories', error });
     }
-};
+  };
 
 // Update a category by ID
 export const updateSubCategory = async (req: Request, res: Response): Promise<void> => {

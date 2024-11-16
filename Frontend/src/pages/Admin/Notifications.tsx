@@ -23,12 +23,10 @@ import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 
-
-// Define allowed notification types
 type NotificationType = 'success' | 'error' | 'info' | 'message' | 'order' | 'payment'
 
 
-// Sample notification data
+
 const initialNotifications: { id: number, type: NotificationType, title: string, message: string, time: string, read: boolean }[] = [
   { id: 1, type: 'success', title: 'Order Shipped', message: 'Your order #12345 has been shipped.', time: '2 hours ago', read: false },
   { id: 2, type: 'error', title: 'Payment Failed', message: 'Your payment for order #67890 has failed.', time: '5 hours ago', read: false },

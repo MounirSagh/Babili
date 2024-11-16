@@ -3,9 +3,9 @@ import { createCart, getCart, deletefromcart, updateCart } from '../controllers/
 
 const router = express.Router();
 
-router.post('/additemtocart', createCart);         // Create a category
-router.get('/getcart', getCart);           // Read all categories
+router.post('/additemtocart', createCart);        
+router.get('/getcart', getCart);          
 router.put('/updatecart/:id', updateCart);
-router.delete('/deletefromcart/:id', deletefromcart);   // Delete a category
+router.delete('/deletefromcart/:id', deletefromcart);   
 
 export default router;

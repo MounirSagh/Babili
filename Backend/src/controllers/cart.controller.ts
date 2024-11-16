@@ -1,9 +1,8 @@
-// src/controllers/categoryController.ts
 import { Request, Response } from 'express';
 import SubCategory from '../models/subcategory.model';
 import Cart from '../models/cart.model';
 
-// Create a new category
+
 export const createCart = async (req: Request, res: Response) => {
     try {
         console.log('hhhhh')
@@ -16,7 +15,7 @@ export const createCart = async (req: Request, res: Response) => {
     }
 };
 
-// Get all categories
+
 export const getCart = async (req: Request, res: Response) => {
     try {
         console.log("hhh")
@@ -27,8 +26,6 @@ export const getCart = async (req: Request, res: Response) => {
     }
 };
 
-
-// Delete a category by ID
 export const deletefromcart = async (req: Request, res: Response): Promise<void> => {
     try {
         const cart = await Cart.findByIdAndDelete(req.params.id);

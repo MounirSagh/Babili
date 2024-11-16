@@ -42,7 +42,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
-// Sample data for charts
+
 const revenueData = [
   { name: "Jan", total: 1200, target: 1000 },
   { name: "Feb", total: 2100, target: 1500 },

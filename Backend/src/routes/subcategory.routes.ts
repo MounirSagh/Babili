@@ -3,11 +3,11 @@ import { createSubCategory, getSubCategories, getSubCategoryById, getSubCategory
 
 const router = express.Router();
 
-router.post('/addsubcategory', createSubCategory);         // Create a category
-router.get('/getsubcategories', getSubCategories);           // Read all categories
-router.get('/getsubcategory/:id', getSubCategoryById);     // Read a specific category
+router.post('/addsubcategory', createSubCategory);        
+router.get('/getsubcategories', getSubCategories);           
+router.get('/getsubcategory/:id', getSubCategoryById);    
 router.get('/getsubcategorybycategory/:id', getSubCategorybycategory); 
-router.put('/updatesubcategory/:id', updateSubCategory);      // Update a category
-router.delete('/deletesubcategories/:id', deleteSubCategory);   // Delete a category
+router.put('/updatesubcategory/:id', updateSubCategory);     
+router.delete('/deletesubcategories/:id', deleteSubCategory);  
 
 export default router;

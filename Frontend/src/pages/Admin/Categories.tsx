@@ -34,7 +34,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 
-// Define the Category type
+
 interface Category {
   _id: string;
   name: string;
@@ -57,13 +57,13 @@ export default function CategoryPage() {
   const [currentCategory, setCurrentCategory] = useState<Category | null>(null);
   const [subCategories, setSubCategories] = useState<Record<string, SubCategory[]>>({});
 
-  // Fetch categories and their subcategories
+
   const fetchCategoriesWithSubCategories = async () => {
     try {
       const categoryResponse = await axios.get('http://localhost:5000/api/categories/getcategories');
       const fetchedCategories = categoryResponse.data;
 
-      // Fetch subcategories for each category
+
       const subCategoryPromises = fetchedCategories.map((category: Category) =>
         axios
           .get(`http://localhost:5000/api/subcategories/getsubcategorybycategory/${category._id}`)
@@ -72,7 +72,7 @@ export default function CategoryPage() {
 
       const subCategoryResults = await Promise.all(subCategoryPromises);
 
-      // Map subcategories by categoryID
+ 
       const subCategoryMap = subCategoryResults.reduce(
         (acc, result) => ({ ...acc, [result.categoryID]: result.subCategories }),
         {}
@@ -229,7 +229,7 @@ export default function CategoryPage() {
   );
 }
 
-// Define CategoryFormProps with a unified type for onSubmit
+
 interface CategoryFormProps {
   initialData: Partial<Omit<Category, 'productCount'>> | null;
   onSubmit: (data: Partial<Omit<Category, '_id' | 'productCount'>>) => void;

@@ -31,7 +31,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 
-// Define Types
+
 interface Category {
   _id: string;
   name: string;
@@ -51,7 +51,7 @@ export default function SubCategoryPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [currentSubCategory, setCurrentSubCategory] = useState<Partial<SubCategory> | null>(null);
 
-  // Fetch all categories and subcategories
+
   const fetchCategories = async () => {
     try {
       const response = await axios.get('http://localhost:5000/api/categories/getcategories');
@@ -243,7 +243,7 @@ export default function SubCategoryPage() {
   );
 }
 
-// Form Component
+
 interface SubCategoryFormProps {
   categories: Category[];
   initialData: Partial<SubCategory> | null;

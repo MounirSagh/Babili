@@ -38,7 +38,7 @@ import {
   Area,
 } from "recharts"
 
-// Sample data for charts and tables
+
 const salesData = [
   { date: '2023-01-01', total: 5000 },
   { date: '2023-02-01', total: 7500 },
@@ -70,8 +70,7 @@ export default function SalesPage() {
 
   const totalRevenue = salesData.reduce((sum, data) => sum + data.total, 0)
   const averageOrderValue = totalRevenue / recentOrders.length
-  const conversionRate = 3.2 // Example static value, replace with actual calculation if available
-
+  const conversionRate = 3.2 
   return (
     <div className="flex h-screen bg-background">
       <LeftSideBar />

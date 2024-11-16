@@ -48,11 +48,9 @@ export default function Component() {
       const newQuantity = updatedCart.quantity - 1;
   
       if (newQuantity <= 0) {
-        // If quantity is zero or less, delete the item from the cart
         await axios.delete(`http://localhost:5000/api/cart/deletefromcart/${updatedCart._id}`);
         setCartItems(cartItems.filter((c) => c._id !== updatedCart._id));
       } else {
-        // Otherwise, update the quantity
         const response = await axios.put(`http://localhost:5000/api/cart/updatecart/${updatedCart._id}`, {
           quantity: newQuantity,
         });
@@ -63,17 +61,6 @@ export default function Component() {
     }
   };
 
-  // const updateQuantity = (id: number, newQuantity: number) => {
-  //   setCartItems(cartItems.map(item => 
-  //     item.id === id ? { ...item, quantity: Math.max(0, newQuantity) } : item
-  //   ).filter(item => item.quantity > 0))
-  // }
-
-  // const removeItem = (id: number) => {
-  //   setCartItems(cartItems.filter(item => item.id !== id))
-  // }
-
-  // const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
 
   return (
     <div className="min-h-screen bg-white">
@@ -81,12 +68,12 @@ export default function Component() {
       <h1 className="text-2xl px-4 py-5 font-bold text-gray-800 text-center mb-8 mt-10">Shopping Cart</h1>
       <div className="container mx-auto px-4">
         {cartItems.length === 0 ? (
-          // Display this message when the cart is empty
+
           <div className="bg-white rounded-lg p-6 mb-8 text-center">
             <p className="text-gray-500 text-xl">Your cart is empty.</p>
           </div>
         ) : (
-          // Display the cart table when there are items in the cart
+      
           <div className="bg-white rounded-lg p-6 mb-8">
             <Table>
               <TableHeader>

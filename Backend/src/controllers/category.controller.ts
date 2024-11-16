@@ -1,8 +1,7 @@
-// src/controllers/categoryController.ts
 import { Request, Response } from 'express';
 import Category from '../models/category.model';
 
-// Create a new category
+
 export const createCategory = async (req: Request, res: Response) => {
     try {
         const category = new Category(req.body);
@@ -13,7 +12,7 @@ export const createCategory = async (req: Request, res: Response) => {
     }
 };
 
-// Get all categories
+
 export const getCategories = async (req: Request, res: Response) => {
     try {
         console.log("hhh")
@@ -25,7 +24,7 @@ export const getCategories = async (req: Request, res: Response) => {
     }
 };
 
-// Get a single category by ID
+
 export const getCategoryById = async (req: Request, res: Response): Promise<void> => {
     try {
         const category = await Category.findById(req.params.id);
@@ -39,7 +38,7 @@ export const getCategoryById = async (req: Request, res: Response): Promise<void
     }
 };
 
-// Update a category by ID
+
 export const updateCategory = async (req: Request, res: Response): Promise<void> => {
     try {
         const category = await Category.findByIdAndUpdate(req.params.id, req.body, { new: true });
@@ -53,7 +52,7 @@ export const updateCategory = async (req: Request, res: Response): Promise<void>
     }
 };
 
-// Delete a category by ID
+
 export const deleteCategory = async (req: Request, res: Response): Promise<void> => {
     try {
         const category = await Category.findByIdAndDelete(req.params.id);

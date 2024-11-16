@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/tooltip"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { LayoutDashboard, Package, ListTree, TrendingUp, Bell } from 'lucide-react'
-import { Separator } from './ui/separator'
 
 interface NavItemProps {
   label: string

@@ -3,10 +3,10 @@ import { createProduct, getProductsByCategory, getProducts, updateProduct, delet
 
 const router = express.Router();
 
-router.post('/addproduct', createProduct);         // Create a category
-router.get('/getproducts', getProducts);           // Read all categories
-router.get('/getproductsbycategory/:id', getProductsByCategory);     // Read a specific category
-router.put('/updateproduct/:id', updateProduct);      // Update a category
-router.delete('/deleteproduct/:id', deleteProduct);   // Delete a category
+router.post('/addproduct', createProduct);         
+router.get('/getproducts', getProducts);           
+router.get('/getproductsbycategory/:id', getProductsByCategory);    
+router.put('/updateproduct/:id', updateProduct);     
+router.delete('/deleteproduct/:id', deleteProduct);  
 
 export default router;

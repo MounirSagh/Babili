@@ -4,9 +4,7 @@ import { console } from 'inspector';
 
 export const placeOrder = async (req: Request, res: Response) => {
   try {
-    console.log("Received payload:", req.body);
     const { userDetails, cartItems } = req.body;
-    console.log('hh',userDetails)
     const order = new Order({
       userDetails,
       cartItems,
@@ -18,5 +16,15 @@ export const placeOrder = async (req: Request, res: Response) => {
     res.status(201).json({ message: 'Order placed successfully', order });
   } catch (error) {
     res.status(500).json({ message: 'Error placing order', error });
+  }
+};
+
+export const getOrders = async (req: Request, res: Response) => {
+  try {
+      const orders = await Order.find();
+      console.log(orders)
+      res.status(200).json(orders);
+  } catch (error) {
+      res.status(500).json({ message: 'Error fetching orders', error });
   }
 };

@@ -20,6 +20,7 @@ export default function App() {
     <div className="h-screen w-full flex">
       <div className="flex-grow">
         <Routes>
+          {/* Client Side */}
           <Route path="/" element={<Home />} />
           <Route path="/Cart" element={<Cart />} />
           <Route path="/Order" element={<Order />} />

@@ -17,7 +17,7 @@ const styles = {
     alignItems: 'center',
     height: '100vh',
     color: '#333',
-    textAlign: 'center' as const, // TypeScript needs this as const to infer the string literal
+    textAlign: 'center' as const, 
   },
   content: {
     backgroundColor: 'rgba(255, 255, 255, 0.85)',

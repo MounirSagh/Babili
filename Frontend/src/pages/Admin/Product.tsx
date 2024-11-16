@@ -30,7 +30,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-// Define Types
+
 interface SubCategory {
   _id: string;
   name: string;
@@ -53,7 +53,6 @@ export default function ProductPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [currentProduct, setCurrentProduct] = useState<Partial<Product> | null>(null);
 
-  // Fetch all subcategories and products
   const fetchSubCategories = async () => {
     try {
       const response = await axios.get('http://localhost:5000/api/subcategories/getsubcategories');
@@ -229,7 +228,6 @@ export default function ProductPage() {
   );
 }
 
-// Form Component
 interface ProductFormProps {
   subCategories: SubCategory[];
   initialData: Partial<Product> | null;

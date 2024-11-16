@@ -49,7 +49,7 @@ export default function Component() {
     try {
       const response = await axios.get('http://localhost:5000/api/subcategories/getsubcategories');
       setProducts(response.data);
-      console.log('Fetched Products:', response.data); // Log response data directly
+      console.log('Fetched Products:', response.data);
     } catch (error) {
       console.error('Error fetching products:', error);
     }
@@ -65,7 +65,7 @@ export default function Component() {
       (selectedCategory === "All" || product.categoryID === selectedCategory)
     );
     setFilteredProducts(filtered);
-  }, [searchTerm, selectedCategory, priceRange, products]); // Add products as a dependency
+  }, [searchTerm, selectedCategory, priceRange, products]); 
 
 
   return (
@@ -91,7 +91,7 @@ export default function Component() {
             </div>
           </div>
 
-          {/* Filters */}
+
           <div className="mb-8 grid grid-cols-1 md:grid-cols-4 gap-4 max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
             <div className="col-span-2">
               <Input

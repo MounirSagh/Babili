@@ -54,7 +54,7 @@ export default function SubCategoryPage() {
 
   const fetchCategories = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/categories/getcategories');
+      const response = await axios.get('http://localhost:3000/api/categories/getcategories');
       setCategories(response.data);
     } catch (error) {
       console.error('Error fetching categories:', error);
@@ -63,7 +63,7 @@ export default function SubCategoryPage() {
 
   const fetchSubCategories = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/subcategories/getsubcategories');
+      const response = await axios.get('http://localhost:3000/api/subcategories/getsubcategories');
       const enrichedSubCategories = await Promise.all(
         response.data.map(async (subcategory: SubCategory) => {
           const productCount = await getProductCountBySubCategory(subcategory._id);
@@ -80,7 +80,7 @@ export default function SubCategoryPage() {
     try {
       console.log("hhh", subcategoryID)
       const response = await axios.get(
-        `http://localhost:5000/api/product/getproductsbycategory/${subcategoryID}`
+        `http://localhost:3000/api/product/getproductsbycategory/${subcategoryID}`
       );
       return response.data.length || 0;
     } catch (error) {
@@ -97,7 +97,7 @@ export default function SubCategoryPage() {
   const handleAddSubCategory = async (newSubCategory: Partial<SubCategory>) => {
     try {
       const response = await axios.post(
-        'http://localhost:5000/api/subcategories/addsubcategory',
+        'http://localhost:3000/api/subcategories/addsubcategory',
         newSubCategory
       );
       setSubCategories([...subCategories, { ...response.data, productCount: 0 }]);
@@ -110,7 +110,7 @@ export default function SubCategoryPage() {
   const handleUpdateSubCategory = async (updatedSubCategory: SubCategory) => {
     try {
       const response = await axios.put(
-        `http://localhost:5000/api/subcategories/updatesubcategory/${updatedSubCategory._id}`,
+        `http://localhost:3000/api/subcategories/updatesubcategory/${updatedSubCategory._id}`,
         updatedSubCategory
       );
       setSubCategories(
@@ -126,7 +126,7 @@ export default function SubCategoryPage() {
 
   const handleDeleteSubCategory = async (subcategoryID: string) => {
     try {
-      await axios.delete(`http://localhost:5000/api/subcategories/deletesubcategories/${subcategoryID}`);
+      await axios.delete(`http://localhost:3000/api/subcategories/deletesubcategories/${subcategoryID}`);
       setSubCategories(subCategories.filter((sc) => sc._id !== subcategoryID));
     } catch (error) {
       console.error('Error deleting subcategory:', error);

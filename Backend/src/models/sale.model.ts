@@ -12,16 +12,14 @@ interface ISale extends Document {
     country: string;
   };
   cartItems: {
-    _id: number;
     REF: string;
-    Poitrine: string;
-    Poids: string;
-    Flottabilité: string;
-    TYPE: string;
-    subcategoryID: string;
+   // Poitrine: string;
+    subcategoryID: mongoose.Schema.Types.ObjectId; // Reference to subcategory model
+    attributes: { key: string; value: string }[]; // Attributes for the product
     quantity: number;
   }[];
   date: Date;
+  totalPrice: number;
 }
 
 const SaleSchema: Schema = new Schema({
@@ -38,16 +36,16 @@ const SaleSchema: Schema = new Schema({
   cartItems: [
     {
       REF: { type: String, required: true },
-      Poitrine: { type: String, required: true },
-      Poids: { type: String, required: true },
-      Flottabilité: { type: String, required: true },
-      TYPE: { type: String, required: true },
-      subcategoryID: { type: String, required: true },
+      //Poitrine: { type: String, required: true },
+      subcategoryID: { type: mongoose.Schema.Types.ObjectId, ref: 'Subcategory' },
+      attributes: [{ key: { type: String }, value: { type: String } }], // New attributes field
       quantity: { type: Number, required: true },
     },
   ],
   date: { type: Date, default: Date.now },
+  totalPrice: { type: Number, required: true },
 });
 
 const Sale = mongoose.model<ISale>('Sale', SaleSchema);
+
 export default Sale;

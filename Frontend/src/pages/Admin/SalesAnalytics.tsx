@@ -1,162 +1,141 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { Search, DollarSign, TrendingUp, ShoppingCart, Package, ArrowUpRight, ArrowDownRight } from 'lucide-react'
-import LeftSideBar from "@/components/SideBar"
-import { Input } from "@/components/ui/input"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import {
-  AreaChart,
-  Bar,
-  BarChart,
-  ResponsiveContainer,
-  XAxis,
-  YAxis,
-  Tooltip,
-  Legend,
-  Area,
-} from "recharts"
+import { useState, useEffect } from "react";
+import axios from "axios";
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, BarChart, Bar, Legend } from "recharts";
+import LeftSideBar from "@/components/SideBar";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
+const baseURL = "http://localhost:3000"; // Define the baseURL
 
-const salesData = [
-  { date: '2023-01-01', total: 5000 },
-  { date: '2023-02-01', total: 7500 },
-  { date: '2023-03-01', total: 6800 },
-  { date: '2023-04-01', total: 9000 },
-  { date: '2023-05-01', total: 8200 },
-  { date: '2023-06-01', total: 10500 },
-]
+export default function AnalyticsDashboard() {
+  const [timeRange, setTimeRange] = useState("7d");
+  const [salesData, setSalesData] = useState([]);
+  const [totalRevenue, setTotalRevenue] = useState(0);
+  const [approvedOrders, setApprovedOrders] = useState(0);
+  const [pendingOrders, setPendingOrders] = useState(0);
+  const [rejectedOrders, setRejectedOrders] = useState(0);
+  const [totalOrders, setTotalOrders] = useState(0);
+  const [selectedStatus, setSelectedStatus] = useState<"Approved" | "Pending" | "Rejected">("Approved");
+  const [topProducts, setTopProducts] = useState([]);
 
-const recentOrders = [
-  { id: '1', customer: 'John Doe', date: '2023-06-15', total: 250.99, status: 'Completed' },
-  { id: '2', customer: 'Jane Smith', date: '2023-06-14', total: 120.50, status: 'Processing' },
-  { id: '3', customer: 'Bob Johnson', date: '2023-06-13', total: 75.00, status: 'Shipped' },
-  { id: '4', customer: 'Alice Brown', date: '2023-06-12', total: 199.99, status: 'Completed' },
-  { id: '5', customer: 'Charlie Wilson', date: '2023-06-11', total: 89.99, status: 'Processing' },
-]
+  useEffect(() => {
+    const fetchSalesData = async () => {
+      try {
+        // Fetch analytics and orders
+        const [analyticsResponse, ordersResponse] = await Promise.all([
+          axios.get(`${baseURL}/api/sales/analytics?timeRange=${timeRange}`),
+        axios.get(`${baseURL}/api/orders?timeRange=${timeRange}`),
+        ]);
 
-const topProducts = [
-  { name: 'Product A', sales: 1200, revenue: 24000 },
-  { name: 'Product B', sales: 950, revenue: 19000 },
-  { name: 'Product C', sales: 800, revenue: 16000 },
-  { name: 'Product D', sales: 600, revenue: 12000 },
-  { name: 'Product E', sales: 500, revenue: 10000 },
-]
+        const { salesData } = analyticsResponse.data;
+        const { orders } = ordersResponse.data;
 
-export default function SalesPage() {
-  const [timeRange, setTimeRange] = useState('7d')
-  const [searchQuery, setSearchQuery] = useState('')
+        // Filter orders by status
+        const approved = orders.filter((order: { status: string }) => order.status === "Approved");
+        const pending = orders.filter((order: { status: string }) => order.status === "Pending");
+        const rejected = orders.filter((order: { status: string }) => order.status === "Rejected");
 
-  const totalRevenue = salesData.reduce((sum, data) => sum + data.total, 0)
-  const averageOrderValue = totalRevenue / recentOrders.length
-  const conversionRate = 3.2 
+        // Calculate total revenue from approved orders
+        const revenue = approved.reduce((sum: number, order: { total: number }) => sum + order.total, 0);
+
+        setSalesData(salesData);
+        setTotalRevenue(revenue);
+        setApprovedOrders(approved.length);
+        setPendingOrders(pending.length);
+        setRejectedOrders(rejected.length);
+        setTotalOrders(orders.length); // Set total orders
+
+        // Fetch top products
+        const topProductsResponse = await axios.get(`http://localhost:3000/api/products/top?timeRange=${timeRange}`);
+        setTopProducts(topProductsResponse.data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchSalesData();
+  }, [timeRange]);
+
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-screen bg-gray-100">
       <LeftSideBar />
       <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="flex items-center justify-between px-6 py-4 border-b">
-          <h1 className="text-2xl font-bold">Sales Dashboard</h1>
-          <div className="flex items-center space-x-4">
-            <Select value={timeRange} onValueChange={setTimeRange}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Select time range" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="7d">Last 7 days</SelectItem>
-                <SelectItem value="30d">Last 30 days</SelectItem>
-                <SelectItem value="90d">Last 90 days</SelectItem>
-                <SelectItem value="12m">Last 12 months</SelectItem>
-              </SelectContent>
-            </Select>
-            <form onSubmit={(e) => e.preventDefault()} className="relative">
-              <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                type="search"
-                placeholder="Search orders..."
-                className="pl-8 w-64"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </form>
-          </div>
+        {/* Header */}
+        <header className="flex items-center justify-between px-6 py-4 border-b bg-white shadow">
+          <h1 className="text-2xl font-bold text-gray-800">Analytics Dashboard</h1>
+          <Select value={timeRange} onValueChange={setTimeRange}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Select time range" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="7d">Last 7 days</SelectItem>
+              <SelectItem value="30d">Last 30 days</SelectItem>
+              <SelectItem value="90d">Last 90 days</SelectItem>
+              <SelectItem value="12m">Last 12 months</SelectItem>
+            </SelectContent>
+          </Select>
         </header>
+
+        {/* Main Content */}
         <main className="flex-1 overflow-y-auto p-6">
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          {/* Summary Cards */}
+          <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-3">
+            {/* Total Revenue */}
             <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-                <DollarSign className="h-4 w-4 text-muted-foreground" />
+              <CardHeader>
+                <CardTitle>Total Revenue</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">${totalRevenue.toLocaleString()}</div>
-                <div className="flex items-center text-xs text-green-500">
-                  <ArrowUpRight className="h-4 w-4 mr-1" />
-                  <span>+20.1% from last month</span>
-                </div>
+                <div className="text-2xl font-bold text-gray-800">MAD {totalRevenue.toLocaleString()}</div>
               </CardContent>
             </Card>
+
+            {/* Total Orders */}
             <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Average Order Value</CardTitle>
-                <ShoppingCart className="h-4 w-4 text-muted-foreground" />
+              <CardHeader>
+                <CardTitle>Total Orders</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">${averageOrderValue.toFixed(2)}</div>
-                <div className="flex items-center text-xs text-green-500">
-                  <ArrowUpRight className="h-4 w-4 mr-1" />
-                  <span>+5.2% from last month</span>
-                </div>
+                <div className="text-2xl font-bold text-gray-800">{totalOrders}</div>
               </CardContent>
             </Card>
+
+            {/* Order Status */}
             <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Conversion Rate</CardTitle>
-                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              <CardHeader>
+                <CardTitle>Order Status</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{conversionRate}%</div>
-                <div className="flex items-center text-xs text-red-500">
-                  <ArrowDownRight className="h-4 w-4 mr-1" />
-                  <span>-0.5% from last month</span>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
-                <Package className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{recentOrders.length}</div>
-                <div className="flex items-center text-xs text-green-500">
-                  <ArrowUpRight className="h-4 w-4 mr-1" />
-                  <span>+12.5% from last month</span>
+                <Select
+                  value={selectedStatus}
+                  onValueChange={(value) => setSelectedStatus(value as "Approved" | "Pending" | "Rejected")}
+                >
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Select Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Approved">Approved Orders</SelectItem>
+                    <SelectItem value="Pending">Pending Orders</SelectItem>
+                    <SelectItem value="Rejected">Rejected Orders</SelectItem>
+                  </SelectContent>
+                </Select>
+                <div className="mt-4 text-xl font-bold text-gray-800">
+                  {selectedStatus} Orders:{" "}
+                  {selectedStatus === "Approved"
+                    ? approvedOrders
+                    : selectedStatus === "Pending"
+                    ? pendingOrders
+                    : rejectedOrders}
                 </div>
               </CardContent>
             </Card>
           </div>
+
+          {/* Charts */}
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7 mt-6">
+            {/* Sales Overview */}
             <Card className="col-span-4">
               <CardHeader>
                 <CardTitle>Sales Overview</CardTitle>
@@ -164,14 +143,16 @@ export default function SalesPage() {
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
                   <AreaChart data={salesData}>
-                    <XAxis dataKey="date" />
+                    <XAxis dataKey="date" tickFormatter={(date) => new Date(date).toLocaleDateString()} />
                     <YAxis />
                     <Tooltip />
-                    <Area type="monotone" dataKey="total" stroke="#8884d8" fill="#8884d8" />
+                    <Area type="monotone" dataKey="total" stroke="#4CAF50" fill="#C8E6C9" />
                   </AreaChart>
                 </ResponsiveContainer>
               </CardContent>
             </Card>
+
+            {/* Top Selling Products */}
             <Card className="col-span-3">
               <CardHeader>
                 <CardTitle>Top Selling Products</CardTitle>
@@ -190,38 +171,8 @@ export default function SalesPage() {
               </CardContent>
             </Card>
           </div>
-          <Card className="mt-6">
-            <CardHeader>
-              <CardTitle>Recent Orders</CardTitle>
-              <CardDescription>Overview of the latest transactions</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Order ID</TableHead>
-                    <TableHead>Customer</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Total</TableHead>
-                    <TableHead>Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {recentOrders.map((order) => (
-                    <TableRow key={order.id}>
-                      <TableCell>{order.id}</TableCell>
-                      <TableCell>{order.customer}</TableCell>
-                      <TableCell>{order.date}</TableCell>
-                      <TableCell>${order.total.toFixed(2)}</TableCell>
-                      <TableCell>{order.status}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
         </main>
       </div>
     </div>
-  )
+  );
 }

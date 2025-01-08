@@ -53,10 +53,10 @@ const revenueData = [
 ]
 
 const userGrowthData = [
-  { name: "Jan", total: 5000, organic: 3000, paid: 2000 },
+  { name: "Jan", total: 3000, organic: 3000, paid: 2000 },
   { name: "Feb", total: 6200, organic: 3700, paid: 2500 },
   { name: "Mar", total: 7800, organic: 4500, paid: 3300 },
-  { name: "Apr", total: 8400, organic: 5000, paid: 3400 },
+  { name: "Apr", total: 8400, organic: 3000, paid: 3400 },
   { name: "May", total: 9100, organic: 5500, paid: 3600 },
   { name: "Jun", total: 10200, organic: 6200, paid: 4000 },
 ]

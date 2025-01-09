@@ -13,6 +13,7 @@ import Sales from './pages/Admin/Sales';
 import SalesAnalytics from './pages/Admin/SalesAnalytics';
 import Subcategories from './pages/Admin/SubCategories';
 import Notifications from './pages/Admin/Notifications';
+import OrderHistoryPage from './pages/Client/OrderHistoryPage.tsx';
 
 
 export default function App() {
@@ -25,6 +26,7 @@ export default function App() {
           <Route path="/Cart" element={<Cart />} />
           <Route path="/Order" element={<Order />} />
           <Route path="/Details" element={<Details />} />
+          <Route path="/order-history" element={<OrderHistoryPage />} />
           <Route path="/SignIn" element={<SignIn />} />
           <Route path="/SignUp" element={<SignUp />} />
           {/* Admin Side */}

@@ -60,13 +60,13 @@ export default function CategoryPage() {
 
   const fetchCategoriesWithSubCategories = async () => {
     try {
-      const categoryResponse = await axios.get('http://localhost:5000/api/categories/getcategories');
+      const categoryResponse = await axios.get('http://localhost:3000/api/categories/getcategories');
       const fetchedCategories = categoryResponse.data;
 
 
       const subCategoryPromises = fetchedCategories.map((category: Category) =>
         axios
-          .get(`http://localhost:5000/api/subcategories/getsubcategorybycategory/${category._id}`)
+          .get(`http://localhost:3000/api/subcategories/getsubcategorybycategory/${category._id}`)
           .then((res) => ({ categoryID: category._id, subCategories: res.data }))
       );
 
@@ -91,7 +91,7 @@ export default function CategoryPage() {
 
   const handleAddCategory = async (newCategory: Omit<Category, '_id' | 'productCount'>) => {
     try {
-      const response = await axios.post('http://localhost:5000/api/categories/addcategory', newCategory);
+      const response = await axios.post('http://localhost:3000/api/categories/addcategory', newCategory);
       setCategories([...categories, response.data]);
       setIsDialogOpen(false);
     } catch (error) {
@@ -101,7 +101,7 @@ export default function CategoryPage() {
 
   const handleUpdateCategory = async (updatedCategory: Category) => {
     try {
-      const response = await axios.put(`http://localhost:5000/api/categories/updatecategory/${updatedCategory._id}`, updatedCategory);
+      const response = await axios.put(`http://localhost:3000/api/categories/updatecategory/${updatedCategory._id}`, updatedCategory);
       setCategories(categories.map((c) => (c._id === updatedCategory._id ? response.data : c)));
       setIsDialogOpen(false);
     } catch (error) {
@@ -111,7 +111,7 @@ export default function CategoryPage() {
 
   const handleDeleteCategory = async (id: string) => {
     try {
-      await axios.delete(`http://localhost:5000/api/categories/deletecategory/${id}`);
+      await axios.delete(`http://localhost:3000/api/categories/deletecategory/${id}`);
       setCategories(categories.filter((c) => c._id !== id));
     } catch (error) {
       console.error('Error deleting category:', error);

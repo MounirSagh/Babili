@@ -90,6 +90,11 @@ export default function InvoiceOrderPage() {
       fetchCart();
 
       setOrderSuccess(true);
+
+      await axios.post("http://localhost:3000/api/mail/confirmation", {
+        toEmail: orderData.userDetails.email, 
+      });
+      alert("Order has been placed and confirmation email sent.");
     } catch (error) {
       console.error("Error placing order:", error);
       if (axios.isAxiosError(error)) {

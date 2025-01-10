@@ -101,12 +101,18 @@ export default function AdminSalesPage() {
         { status }
       );
       const updatedOrder = response.data.order;
-
       setOrders((prevOrders) =>
         prevOrders.map((order) =>
           order._id === updatedOrder._id ? updatedOrder : order
         )
       );
+      
+      if (status === "Approved") {
+        await axios.post("http://localhost:3000/api/mail/approval", {
+          toEmail: updatedOrder.userDetails.email, 
+        });
+        alert("Order status updated and confirmation email sent.");
+      }
     } catch (error) {
       console.error("Error updating order status:", error);
       alert("Failed to update order status. Please try again.");

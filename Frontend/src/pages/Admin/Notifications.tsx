@@ -25,6 +25,8 @@ import { Separator } from '@/components/ui/separator';
 import axios from 'axios';
 
 import { downloadInvoice } from "@/utils/invoice";
+import { useUser } from '@clerk/clerk-react';
+import { useNavigate } from 'react-router-dom';
 type NotificationType = 'success' | 'error' | 'info' | 'message' | 'order' | 'payment';
 
 type Notification = {
@@ -47,6 +49,20 @@ const notificationIcons = {
 };
 
 export default function NotificationsPage() {
+  const { user, isLoaded } = useUser(); 
+  const navigate = useNavigate(); 
+
+  useEffect(() => {
+    if (isLoaded && user?.publicMetadata?.role !== 'admin') {
+      navigate('/');
+    }
+  }, [isLoaded, user, navigate]);
+
+  if (!isLoaded || user?.publicMetadata?.role !== 'admin') {
+    return <h1 className="text-center mt-10">Loading...</h1>; 
+  }
+
+  
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState('all');

@@ -1,152 +1,3 @@
-
-// 'use client';
-
-// import { useEffect, useState } from 'react';
-// import { useUser } from '@clerk/clerk-react';
-// import axios from 'axios';
-// import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-// import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-// import NavBar from '@/components/NavBar';
-
-// type CartItem = {
-//   productId: {
-//     REF: string;
-//     price: number;
-//     attributes: { key: string; value: any }[];
-//     subcategoryID: { name: string };
-//   };
-//   quantity: number;
-// };
-
-// type Order = {
-//   _id: string;
-//   userDetails: {
-//     firstName: string;
-//     lastName: string;
-//     email: string;
-//   };
-//   cartItems: CartItem[];
-//   date: string;
-//   totalPrice: number;
-//   status: string; // Pending, Approved, Rejected
-// };
-
-// export default function OrderHistoryPage() {
-//   const { user } = useUser();
-//   const [orders, setOrders] = useState<Order[]>([]);
-//   const [isLoading, setIsLoading] = useState(true);
-
-//   const fetchOrders = async () => {
-//     try {
-//       const response = await axios.get(
-//         `http://localhost:3000/api/order/userorders/${user?.id}`
-//       );
-//       setOrders(response.data);
-//     } catch (error) {
-//       console.error('Error fetching user orders:', error);
-//     } finally {
-//       setIsLoading(false);
-//     }
-//   };
-
-//   useEffect(() => {
-//     if (user?.id) {
-//       fetchOrders();
-//     }
-//   }, [user]);
-
-//   return (
-//     <div className="min-h-screen bg-gray-50">
-//       <NavBar />
-//       <main className="container mx-auto py-12 px-6 lg:px-12">
-//         <Card className="max-w-6xl mx-auto bg-white shadow-lg rounded-lg">
-//           <CardHeader className="border-b border-gray-200">
-//             <CardTitle className="text-4xl font-bold text-center text-gray-900 py-6">
-//               Order History
-//             </CardTitle>
-//           </CardHeader>
-//           <CardContent>
-//             {isLoading ? (
-//               <div className="flex justify-center items-center py-16">
-//                 <p className="text-lg font-medium text-gray-500">Loading your order history...</p>
-//               </div>
-//             ) : orders.length > 0 ? (
-//               <Table className="w-full border-collapse">
-//                 <TableHeader>
-//                   <TableRow className="bg-gray-100">
-//                     <TableHead className="text-left py-4 px-6 font-semibold text-gray-700 uppercase tracking-wider">
-//                       Order ID
-//                     </TableHead>
-//                     <TableHead className="text-left py-4 px-6 font-semibold text-gray-700 uppercase tracking-wider">
-//                       Date
-//                     </TableHead>
-//                     <TableHead className="text-left py-4 px-6 font-semibold text-gray-700 uppercase tracking-wider">
-//                       Items
-//                     </TableHead>
-//                     <TableHead className="text-left py-4 px-6 font-semibold text-gray-700 uppercase tracking-wider">
-//                       Total Quantity
-//                     </TableHead>
-//                     <TableHead className="text-left py-4 px-6 font-semibold text-gray-700 uppercase tracking-wider">
-//                       Total Price
-//                     </TableHead>
-//                     <TableHead className="text-left py-4 px-6 font-semibold text-gray-700 uppercase tracking-wider">
-//                       Status
-//                     </TableHead>
-//                   </TableRow>
-//                 </TableHeader>
-//                 <TableBody>
-//                   {orders.map((order) => (
-//                     <TableRow key={order._id} className="hover:bg-gray-50 transition duration-300">
-//                       <TableCell className="py-4 px-6 text-gray-800 font-medium">
-//                         {order._id}
-//                       </TableCell>
-//                       <TableCell className="py-4 px-6 text-gray-600">
-//                         {new Date(order.date).toLocaleString()}
-//                       </TableCell>
-//                       <TableCell className="py-4 px-6 text-gray-600">
-//   {order.cartItems.map((item, index) => (
-//     <p key={index} className="mb-1">
-//       <span className="font-medium text-gray-800">
-//         {item.productId?.subcategoryID?.name || "Unknown Subcategory"}: {item.productId?.REF || "Unknown REF"}
-//       </span>{' '}
-//       (Qty: {item.quantity})
-//       {item.productId?.attributes?.length > 0 && (
-//         <ul className="ml-4 list-disc">
-//           {item.productId.attributes.map((attr, idx) => (
-//             <li key={idx} className="text-sm text-gray-600">
-//               {attr.key}: {attr.value}
-//             </li>
-//           ))}
-//         </ul>
-//       )}
-//     </p>
-//   ))}
-// </TableCell>
-
-//                       <TableCell className="py-4 px-6 text-gray-600 font-medium">
-//                         {order.cartItems.reduce((total, item) => total + item.quantity, 0)}
-//                       </TableCell>
-//                       <TableCell className="py-4 px-6 font-semibold text-green-600">
-//                         MAD {order.totalPrice ? order.totalPrice.toFixed(2) : '0.00'}
-//                       </TableCell>
-//                       <TableCell className="py-4 px-6 text-gray-800 font-bold">
-//                         {order.status}
-//                       </TableCell>
-//                     </TableRow>
-//                   ))}
-//                 </TableBody>
-//               </Table>
-//             ) : (
-//               <div className="text-center py-16">
-//                 <p className="text-lg font-semibold text-gray-500">No orders found.</p>
-//               </div>
-//             )}
-//           </CardContent>
-//         </Card>
-//       </main>
-//     </div>
-//   );
-// }
 "use client";
 
 import { useEffect, useState } from "react";
@@ -184,7 +35,7 @@ type Order = {
   cartItems: CartItem[];
   date: string;
   totalPrice: number;
-  status: string; // Pending, Approved, Rejected
+  status: string; 
 };
 
 export default function OrderHistoryPage() {
@@ -216,7 +67,7 @@ export default function OrderHistoryPage() {
     }
   }, [user]);
 
-  // Filter orders based on date, status, and subcategory name
+
   useEffect(() => {
     const filtered = orders.filter((order) => {
       const matchesSearch = order.cartItems.some((item) =>

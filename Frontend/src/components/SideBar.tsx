@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/tooltip"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { LayoutDashboard, Package, ListTree, TrendingUp, Bell } from 'lucide-react'
+import { useClerk } from '@clerk/clerk-react'
 
 interface NavItemProps {
   label: string
@@ -86,6 +87,8 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ className }) => {
+  const { signOut } = useClerk()
+
   return (
     <div className={`w-64 flex-col border-r bg-background hidden md:flex ${className}`}>
       <div className="p-4 text-center ml-14">
@@ -104,8 +107,8 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
         </div>
       </ScrollArea>
       <div className="mt-auto p-4">
-        <Button variant="outline" className="w-full">
-          Logout
+        <Button variant="outline" className="w-full" onClick={() => signOut({ redirectUrl: '/' })}>
+            Log out
         </Button>
       </div>
     </div>

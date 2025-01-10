@@ -30,6 +30,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { useNavigate } from 'react-router-dom';
+import { useUser } from '@clerk/clerk-react';
 
 
 interface Category {
@@ -45,6 +47,20 @@ interface SubCategory {
 }
 
 export default function SubCategoryPage() {
+  const { user, isLoaded } = useUser(); 
+  const navigate = useNavigate(); 
+
+  useEffect(() => {
+    if (isLoaded && user?.publicMetadata?.role !== 'admin') {
+      navigate('/');
+    }
+  }, [isLoaded, user, navigate]);
+
+  if (!isLoaded || user?.publicMetadata?.role !== 'admin') {
+    return <h1 className="text-center mt-10">Loading...</h1>; 
+  }
+
+
   const [categories, setCategories] = useState<Category[]>([]);
   const [subCategories, setSubCategories] = useState<SubCategory[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>('');

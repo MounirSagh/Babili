@@ -6,10 +6,26 @@ import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, BarChart, 
 import LeftSideBar from "@/components/SideBar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useUser } from "@clerk/clerk-react";
+import { useNavigate } from "react-router-dom";
 
-const baseURL = "http://localhost:3000"; // Define the baseURL
+const baseURL = "http://localhost:3000"; 
 
 export default function AnalyticsDashboard() {
+  const { user, isLoaded } = useUser(); 
+  const navigate = useNavigate(); 
+
+  useEffect(() => {
+    if (isLoaded && user?.publicMetadata?.role !== 'admin') {
+      navigate('/');
+    }
+  }, [isLoaded, user, navigate]);
+
+  if (!isLoaded || user?.publicMetadata?.role !== 'admin') {
+    return <h1 className="text-center mt-10">Loading...</h1>; 
+  }
+
+
   const [timeRange, setTimeRange] = useState("7d");
   const [salesData, setSalesData] = useState([]);
   const [totalRevenue, setTotalRevenue] = useState(0);
@@ -23,7 +39,6 @@ export default function AnalyticsDashboard() {
   useEffect(() => {
     const fetchSalesData = async () => {
       try {
-        // Fetch analytics and orders
         const [analyticsResponse, ordersResponse] = await Promise.all([
           axios.get(`${baseURL}/api/sales/analytics?timeRange=${timeRange}`),
         axios.get(`${baseURL}/api/orders?timeRange=${timeRange}`),
@@ -32,12 +47,12 @@ export default function AnalyticsDashboard() {
         const { salesData } = analyticsResponse.data;
         const { orders } = ordersResponse.data;
 
-        // Filter orders by status
+
         const approved = orders.filter((order: { status: string }) => order.status === "Approved");
         const pending = orders.filter((order: { status: string }) => order.status === "Pending");
         const rejected = orders.filter((order: { status: string }) => order.status === "Rejected");
 
-        // Calculate total revenue from approved orders
+
         const revenue = approved.reduce((sum: number, order: { total: number }) => sum + order.total, 0);
 
         setSalesData(salesData);
@@ -45,9 +60,8 @@ export default function AnalyticsDashboard() {
         setApprovedOrders(approved.length);
         setPendingOrders(pending.length);
         setRejectedOrders(rejected.length);
-        setTotalOrders(orders.length); // Set total orders
+        setTotalOrders(orders.length);
 
-        // Fetch top products
         const topProductsResponse = await axios.get(`http://localhost:3000/api/products/top?timeRange=${timeRange}`);
         setTopProducts(topProductsResponse.data);
       } catch (error) {
@@ -62,7 +76,6 @@ export default function AnalyticsDashboard() {
     <div className="flex h-screen bg-gray-100">
       <LeftSideBar />
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Header */}
         <header className="flex items-center justify-between px-6 py-4 border-b bg-white shadow">
           <h1 className="text-2xl font-bold text-gray-800">Analytics Dashboard</h1>
           <Select value={timeRange} onValueChange={setTimeRange}>
@@ -78,11 +91,9 @@ export default function AnalyticsDashboard() {
           </Select>
         </header>
 
-        {/* Main Content */}
+
         <main className="flex-1 overflow-y-auto p-6">
-          {/* Summary Cards */}
-          <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-3">
-            {/* Total Revenue */}
+          <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-3">  
             <Card>
               <CardHeader>
                 <CardTitle>Total Revenue</CardTitle>
@@ -92,7 +103,7 @@ export default function AnalyticsDashboard() {
               </CardContent>
             </Card>
 
-            {/* Total Orders */}
+     
             <Card>
               <CardHeader>
                 <CardTitle>Total Orders</CardTitle>
@@ -102,7 +113,7 @@ export default function AnalyticsDashboard() {
               </CardContent>
             </Card>
 
-            {/* Order Status */}
+
             <Card>
               <CardHeader>
                 <CardTitle>Order Status</CardTitle>
@@ -133,9 +144,9 @@ export default function AnalyticsDashboard() {
             </Card>
           </div>
 
-          {/* Charts */}
+          
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7 mt-6">
-            {/* Sales Overview */}
+           
             <Card className="col-span-4">
               <CardHeader>
                 <CardTitle>Sales Overview</CardTitle>
@@ -152,7 +163,7 @@ export default function AnalyticsDashboard() {
               </CardContent>
             </Card>
 
-            {/* Top Selling Products */}
+           
             <Card className="col-span-3">
               <CardHeader>
                 <CardTitle>Top Selling Products</CardTitle>

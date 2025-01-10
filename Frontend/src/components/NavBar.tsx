@@ -3,11 +3,11 @@ import { SignedIn, SignedOut, UserButton } from "@clerk/clerk-react";
 import { ShoppingCart, ShoppingBag } from "lucide-react";
 
 const NavBar = () => {
-  const location = useLocation(); // Get the current URL path
+  const location = useLocation(); 
 
   return (
     <nav className="flex items-center justify-between h-16 px-6 shadow-md border-b bg-white">
-      {/* Logo */}
+      
       <Link to="/" className="flex items-center gap-4">
         <img
           src="src/assets/LOGO-Babili-3.png"
@@ -16,7 +16,7 @@ const NavBar = () => {
         />
       </Link>
 
-      {/* Order History (Visible only on Home Page and for Signed-In Users) */}
+      
       {location.pathname === "/" && (
         <SignedIn>
           <Link
@@ -29,9 +29,7 @@ const NavBar = () => {
         </SignedIn>
       )}
 
-      {/* Authentication and Cart */}
       <div className="flex items-center gap-4">
-        {/* Signed Out Links */}
         <SignedOut>
           <Link
             to="/SignIn"
@@ -47,7 +45,6 @@ const NavBar = () => {
           </Link>
         </SignedOut>
 
-        {/* Signed In Links */}
         <SignedIn>
           <UserButton />
           <Link

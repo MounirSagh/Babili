@@ -1,6 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useUser } from '@clerk/clerk-react'; 
 import { Bell, Search, Users, DollarSign, Activity, ShoppingCart, ArrowUpRight, ArrowDownRight } from 'lucide-react'
 import LeftSideBar from "@/components/SideBar"
 import { Input } from "@/components/ui/input"
@@ -72,6 +74,19 @@ const productPerformanceData = [
 export default function Dashboard() {
   const [searchQuery, setSearchQuery] = useState('')
   const [timeRange, setTimeRange] = useState('7d')
+  const { user, isLoaded } = useUser(); 
+  const navigate = useNavigate(); 
+
+  useEffect(() => {
+    if (isLoaded && user?.publicMetadata?.role !== 'admin') {
+      navigate('/');
+    }
+  }, [isLoaded, user, navigate]);
+
+  if (!isLoaded || user?.publicMetadata?.role !== 'admin') {
+    return <h1 className="text-center mt-10">Loading...</h1>; 
+  }
+
 
   return (
     <div className="flex h-screen bg-background">

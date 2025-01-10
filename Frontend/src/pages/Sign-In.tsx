@@ -7,8 +7,7 @@ export default function Component() {
       <div className="flex w-full justify-center max-w-[600px] flex-col gap-8 p-8 lg:p-12">
         <div className="flex items-center gap-2">
           <img src="src/assets/LOGO-Babili-3.png" alt="NeoCode Logo" className="w-24 h-auto" />     
-        </div>
-       
+        </div>    
         <SignIn />
       </div>
       <div className="hidden flex-1 flex-col justify-between bg-blue-900 p-12 lg:flex">

@@ -172,6 +172,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import NavBar from "@/components/NavBar";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { useUser } from "@clerk/clerk-react";
 
 type SubCategory = {
   _id: string;
@@ -192,6 +193,15 @@ export default function Component() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [categories, setCategories] = useState<Category[]>([]);
+  const { user, isLoaded } = useUser(); 
+
+  useEffect(() => {
+    if (isLoaded && user?.publicMetadata?.role == 'admin') {
+      navigate('/Admin/Dashboard'); 
+    }
+  }, [isLoaded, user, navigate]);
+
+
 
   // Fetch categories from backend
   const fetchCategories = async () => {

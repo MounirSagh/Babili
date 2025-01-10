@@ -33,6 +33,8 @@ import {
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { useNavigate } from 'react-router-dom';
+import { useUser } from '@clerk/clerk-react';
 
 
 interface Category {
@@ -51,6 +53,20 @@ interface SubCategory {
 }
 
 export default function CategoryPage() {
+  const { user, isLoaded } = useUser(); 
+  const navigate = useNavigate(); 
+
+  useEffect(() => {
+    if (isLoaded && user?.publicMetadata?.role !== 'admin') {
+      navigate('/');
+    }
+  }, [isLoaded, user, navigate]);
+
+  if (!isLoaded || user?.publicMetadata?.role !== 'admin') {
+    return <h1 className="text-center mt-10">Loading...</h1>; 
+  }
+
+
   const [categories, setCategories] = useState<Category[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);

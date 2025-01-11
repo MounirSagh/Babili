@@ -7,6 +7,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "@clerk/clerk-react";
 import { Checkbox } from "@/components/ui/checkbox";
+import Select from "react-select";
 
 type SubCategory = {
   _id: string;
@@ -28,6 +29,7 @@ export default function Component() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const { user, isLoaded } = useUser();
+  const [isMobile, setIsMobile] = useState<boolean>(false);
 
   useEffect(() => {
     if (isLoaded && user?.publicMetadata?.role === "admin") {
@@ -35,11 +37,16 @@ export default function Component() {
     }
   }, [isLoaded, user, navigate]);
 
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    handleResize(); // Set initial value
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   const fetchCategories = async () => {
     try {
-      const response = await axios.get(
-        "http://localhost:3000/api/categories/getcategories"
-      );
+      const response = await axios.get("http://localhost:3000/api/categories/getcategories");
       setCategories(response.data);
     } catch (error) {
       console.error("Error fetching categories:", error);
@@ -52,9 +59,7 @@ export default function Component() {
 
   const fetchSubCategories = async () => {
     try {
-      const response = await axios.get(
-        "http://localhost:3000/api/subcategories/getsubcategories"
-      );
+      const response = await axios.get("http://localhost:3000/api/subcategories/getsubcategories");
       setSubcategories(response.data);
       setFilteredSubcategories(response.data); // Show all by default
     } catch (error) {
@@ -84,6 +89,11 @@ export default function Component() {
     );
   };
 
+  const handleSelectChange = (selectedOptions: any) => {
+    const selectedValues = selectedOptions ? selectedOptions.map((option: any) => option.value) : [];
+    setSelectedCategories(selectedValues);
+  };
+
   return (
     <div className="min-h-screen bg-gray-100">
       <NavBar />
@@ -98,9 +108,7 @@ export default function Component() {
             muted
           />
           <div className="relative z-10 flex flex-col items-center justify-center h-full text-center text-white bg-gradient-to-t from-black via-transparent to-black/30 p-8">
-            <h2 className="text-2xl md:text-4xl font-medium mb-2">
-              Explore the Colourful World
-            </h2>
+            <h2 className="text-2xl md:text-4xl font-medium mb-2">Explore the Colourful World</h2>
             <div className="w-32 md:w-52 h-[2px] bg-blue-500 mb-4"></div>
             <h1 className="text-4xl md:text-6xl font-extrabold mb-6 drop-shadow-lg">
               A WONDERFUL GIFT
@@ -118,9 +126,7 @@ export default function Component() {
             <h2 className="text-xl font-semibold mb-4">Filters</h2>
             {/* Search */}
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Search
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Search</label>
               <Input
                 type="text"
                 placeholder="Search subcategories..."
@@ -131,20 +137,31 @@ export default function Component() {
             </div>
             {/* Categories */}
             <div className="mb-6">
-              <h3 className="text-sm font-medium text-gray-700 mb-2">
-                Categories
-              </h3>
-              <div className="space-y-2">
-                {categories.map((category) => (
-                  <div key={category._id} className="flex items-center space-x-2">
-                    <Checkbox
-                      checked={selectedCategories.includes(category._id)}
-                      onCheckedChange={() => handleCategoryChange(category._id)}
-                    />
-                    <span className="text-sm">{category.name}</span>
-                  </div>
-                ))}
-              </div>
+              <h3 className="text-sm font-medium text-gray-700 mb-2">Categories</h3>
+              {isMobile ? (
+                <Select
+                  isMulti
+                  options={categories.map((category) => ({
+                    value: category._id,
+                    label: category.name,
+                  }))}
+                  onChange={handleSelectChange}
+                  className="react-select-container"
+                  classNamePrefix="react-select"
+                />
+              ) : (
+                <div className="space-y-2">
+                  {categories.map((category) => (
+                    <div key={category._id} className="flex items-center space-x-2">
+                      <Checkbox
+                        checked={selectedCategories.includes(category._id)}
+                        onCheckedChange={() => handleCategoryChange(category._id)}
+                      />
+                      <span className="text-sm">{category.name}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
             <Button
               onClick={applyFilters}
@@ -172,15 +189,9 @@ export default function Component() {
                   />
                 </CardHeader>
                 <CardContent className="p-4 flex-grow">
-                  <CardTitle className="text-lg font-semibold">
-                    {subcategory.name}
-                  </CardTitle>
+                  <CardTitle className="text-lg font-semibold">{subcategory.name}</CardTitle>
                   <p className="text-sm text-gray-600">
-                    {
-                      categories.find(
-                        (category) => category._id === subcategory.categoryID
-                      )?.name
-                    }
+                    {categories.find((category) => category._id === subcategory.categoryID)?.name}
                   </p>
                 </CardContent>
                 <CardFooter className="p-4 mt-auto">

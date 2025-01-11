@@ -35,7 +35,7 @@ type Order = {
   cartItems: CartItem[];
   date: string;
   totalPrice: number;
-  status: string; 
+  status: string;
 };
 
 export default function OrderHistoryPage() {
@@ -67,7 +67,6 @@ export default function OrderHistoryPage() {
     }
   }, [user]);
 
-
   useEffect(() => {
     const filtered = orders.filter((order) => {
       const matchesSearch = order.cartItems.some((item) =>
@@ -90,21 +89,21 @@ export default function OrderHistoryPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <NavBar />
-      <main className="container mx-auto py-12 px-8 lg:px-12">
+      <main className="container mx-auto py-12 px-4 md:px-8 lg:px-12">
         <Card className="max-w-7xl mx-auto bg-white shadow-lg rounded-lg">
-          <CardHeader className="border-b border-white-800">
-            <CardTitle className="text-4xl font-bold text-center text-gray-900 py-6">
+          <CardHeader className="border-b">
+            <CardTitle className="text-3xl font-bold text-center text-gray-900 py-4">
               Order History
             </CardTitle>
           </CardHeader>
           <CardContent>
             {/* Filters */}
-            <div className="grid grid-cols-0 md:grid-cols-3 gap-5 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
               <Input
                 placeholder="Search by subcategory name"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="col-span-1"
+                className="w-full"
               />
               <Select onValueChange={setStatusFilter}>
                 <SelectTrigger>
@@ -117,20 +116,20 @@ export default function OrderHistoryPage() {
                   <SelectItem value="Rejected">Rejected</SelectItem>
                 </SelectContent>
               </Select>
-              <div className="flex items-center space-x-1">
+              <div className="flex items-center space-x-2">
                 <Input
                   type="date"
                   placeholder="Start date"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
-                  className="flex-grow"
+                  className="w-full"
                 />
                 <Input
                   type="date"
                   placeholder="End date"
                   value={endDate}
                   onChange={(e) => setEndDate(e.target.value)}
-                  className="flex-grow"
+                  className="w-full"
                 />
               </div>
             </div>
@@ -143,62 +142,64 @@ export default function OrderHistoryPage() {
                 </p>
               </div>
             ) : filteredOrders.length > 0 ? (
-              <Table className="w-full border-collapse">
-                <TableHeader>
-                  <TableRow className="bg-gray-100">
-                    <TableHead className="text-left py-4 px-6 font-semibold text-gray-700 uppercase tracking-wider">
-                      Order ID
-                    </TableHead>
-                    <TableHead className="text-left py-4 px-6 font-semibold text-gray-700 uppercase tracking-wider">
-                      Date
-                    </TableHead>
-                    <TableHead className="text-left py-4 px-6 font-semibold text-gray-700 uppercase tracking-wider">
-                      Items
-                    </TableHead>
-                    <TableHead className="text-left py-4 px-6 font-semibold text-gray-700 uppercase tracking-wider">
-                      Total Quantity
-                    </TableHead>
-                    <TableHead className="text-left py-4 px-6 font-semibold text-gray-700 uppercase tracking-wider">
-                      Total Price
-                    </TableHead>
-                    <TableHead className="text-left py-4 px-6 font-semibold text-gray-700 uppercase tracking-wider">
-                      Status
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredOrders.map((order) => (
-                    <TableRow key={order._id} className="hover:bg-gray-50 transition duration-300">
-                      <TableCell className="py-4 px-6 text-gray-800 font-medium">
-                        {order._id}
-                      </TableCell>
-                      <TableCell className="py-4 px-6 text-gray-600">
-                        {new Date(order.date).toLocaleString()}
-                      </TableCell>
-                      <TableCell className="py-4 px-6 text-gray-600">
-                        {order.cartItems.map((item, index) => (
-                          <p key={index} className="mb-1">
-                            <span className="font-medium text-gray-800">
-                              {item.productId?.subcategoryID?.name || "Unknown"}:{" "}
-                              {item.productId?.REF || "Unknown REF"}
-                            </span>{" "}
-                            (Qty: {item.quantity})
-                          </p>
-                        ))}
-                      </TableCell>
-                      <TableCell className="py-4 px-6 text-gray-600 font-medium">
-                        {order.cartItems.reduce((total, item) => total + item.quantity, 0)}
-                      </TableCell>
-                      <TableCell className="py-4 px-6 font-semibold text-green-600">
-                        MAD {order.totalPrice ? order.totalPrice.toFixed(2) : "0.00"}
-                      </TableCell>
-                      <TableCell className="py-4 px-6 text-gray-800 font-bold">
-                        {order.status}
-                      </TableCell>
+              <div className="overflow-x-auto">
+                <Table className="w-full border-collapse">
+                  <TableHeader className="sticky top-0 bg-gray-100 z-10">
+                    <TableRow>
+                      <TableHead className="text-left py-4 px-6 font-semibold text-gray-700 uppercase tracking-wider">
+                        Order ID
+                      </TableHead>
+                      <TableHead className="text-left py-4 px-6 font-semibold text-gray-700 uppercase tracking-wider">
+                        Date
+                      </TableHead>
+                      <TableHead className="text-left py-4 px-6 font-semibold text-gray-700 uppercase tracking-wider">
+                        Items
+                      </TableHead>
+                      <TableHead className="text-left py-4 px-6 font-semibold text-gray-700 uppercase tracking-wider">
+                        Total Quantity
+                      </TableHead>
+                      <TableHead className="text-left py-4 px-6 font-semibold text-gray-700 uppercase tracking-wider">
+                        Total Price
+                      </TableHead>
+                      <TableHead className="text-left py-4 px-6 font-semibold text-gray-700 uppercase tracking-wider">
+                        Status
+                      </TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredOrders.map((order) => (
+                      <TableRow key={order._id} className="hover:bg-gray-50 transition duration-300">
+                        <TableCell className="py-4 px-6 text-gray-800 font-medium">
+                          {order._id}
+                        </TableCell>
+                        <TableCell className="py-4 px-6 text-gray-600">
+                          {new Date(order.date).toLocaleString()}
+                        </TableCell>
+                        <TableCell className="py-4 px-6 text-gray-600">
+                          {order.cartItems.map((item, index) => (
+                            <p key={index} className="mb-1">
+                              <span className="font-medium text-gray-800">
+                                {item.productId?.subcategoryID?.name || "Unknown"}:{" "}
+                                {item.productId?.REF || "Unknown REF"}
+                              </span>{" "}
+                              (Qty: {item.quantity})
+                            </p>
+                          ))}
+                        </TableCell>
+                        <TableCell className="py-4 px-6 text-gray-600 font-medium">
+                          {order.cartItems.reduce((total, item) => total + item.quantity, 0)}
+                        </TableCell>
+                        <TableCell className="py-4 px-6 font-semibold text-green-600">
+                          MAD {order.totalPrice ? order.totalPrice.toFixed(2) : "0.00"}
+                        </TableCell>
+                        <TableCell className="py-4 px-6 text-gray-800 font-bold">
+                          {order.status}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             ) : (
               <div className="text-center py-16">
                 <p className="text-lg font-semibold text-gray-500">No orders found.</p>

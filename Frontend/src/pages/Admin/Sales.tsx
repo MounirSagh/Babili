@@ -22,6 +22,7 @@ import { Input } from "@/components/ui/input";
 import { downloadInvoice } from "@/utils/invoice";
 import { useUser } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
+import AnalyticsDashboard from '@/components/SalesAnalytics';
 
 type Attribute = {
   key: string;
@@ -136,14 +137,15 @@ export default function AdminSalesPage() {
   });
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen bg-white">
       <LeftSideBar />
       <div className="flex-1 flex flex-col overflow-hidden">
         <header className="flex items-center justify-between px-6 py-4 border-b bg-white shadow-sm">
           <h1 className="text-2xl font-bold text-gray-800">Admin Dashboard - Sales</h1>
         </header>
+        <AnalyticsDashboard />
         <main className="flex-1 overflow-y-auto p-6">
-          <Card className="mt-6 shadow-md bg-white">
+          <Card className="shadow-md bg-white">
             <CardHeader>
               <CardTitle className="text-lg font-semibold text-gray-700">All Orders</CardTitle>
             </CardHeader>

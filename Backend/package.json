@@ -25,6 +25,7 @@
     "nodemailer": "^6.9.16",
     "pdfkit": "^0.16.0",
     "pino": "^9.6.0",
+    "react-circular-progressbar": "^2.1.0",
     "rollup": "^4.30.0",
     "vite": "^6.0.7"
   },

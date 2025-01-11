@@ -1,59 +1,3 @@
-// import { Request, Response } from 'express';
-// import SubCategory from '../models/subcategory.model';
-// import Cart from '../models/cart.model';
-
-
-// export const createCart = async (req: Request, res: Response) => {
-//     try {
-//         const cart = new Cart({ ...req.body, quantity: 1 });
-//         await cart.save();
-//         await cart.save();
-//         res.status(201).json(cart);
-//     } catch (error) {
-//         res.status(400).json({ message: 'Error creating cart', error });
-//     }
-// };
-
-
-// export const getCart = async (req: Request, res: Response) => {
-//     try {
-//         const cart = await Cart.find();
-//         res.status(200).json(cart);
-//     } catch (error) {
-//         res.status(500).json({ message: 'Error fetching cart', error });
-//     }
-// };
-
-// export const deletefromcart = async (req: Request, res: Response): Promise<void> => {
-//     try {
-//         const cart = await Cart.findByIdAndDelete(req.params.id);
-//         if (!cart) {
-//             res.status(404).json({ message: 'Item not found' });
-//         } else {
-//             res.status(200).json({ message: 'Item deleted' });
-//         }
-//     } catch (error) {
-//         res.status(500).json({ message: 'Error deleting from cart', error });
-//     }
-// };
-
-// export const updateCart = async (req: Request, res: Response) => {
-//     try {
-//       const { quantity } = req.body;
-//       const updatedCart = await Cart.findByIdAndUpdate(
-//         req.params.id,
-//         { quantity },
-//         { new: true }
-//       );
-//       if (!updatedCart) {
-//         res.status(404).json({ message: 'Item not found' });
-//       } else {
-//         res.status(200).json(updatedCart);
-//       }
-//     } catch (error) {
-//       res.status(500).json({ message: 'Error updating cart item', error });
-//     }
-//   };
 
 
 
@@ -63,24 +7,6 @@ import Product from "../models/product.model";
 
 
 // Create a new cart item
-// export const createCart = async (req: Request, res: Response): Promise<Response> => {
-//     try {
-//       const { productId, quantity } = req.body;
-  
-//       // Validate required fields
-//       if (!productId || typeof quantity !== "number" || quantity < 1) {
-//         return res.status(400).json({ message: "Invalid input. productId and quantity are required, and quantity must be at least 1." });
-//       }
-  
-//       const newCartItem = new Cart({ productId, quantity });
-//       await newCartItem.save();
-//       return res.status(201).json(newCartItem);
-//     } catch (error) {
-//       console.error("Error creating cart item:", error);
-//       return res.status(500).json({ message: "Error creating cart item", error });
-//     }
-//   };
-
 
 export const createCart = async (req: Request, res: Response) => {
   try {
@@ -112,16 +38,6 @@ export const createCart = async (req: Request, res: Response) => {
   }
 };
 
-// export const createCart = async (req: Request, res: Response) => {
-//     try {
-//         const cart = new Cart({ ...req.body, quantity: 1 });
-//         await cart.save();
-//         await cart.save();
-//         res.status(201).json(cart);
-//     } catch (error) {
-//         res.status(400).json({ message: 'Error creating cart', error });
-//     }
-// };
 
 // Get all cart items
 export const getCart = async (req: Request, res: Response): Promise<Response> => {

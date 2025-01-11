@@ -1,15 +1,3 @@
-// import express from 'express';
-// import { createProduct, getProductsByCategory, getProducts, updateProduct, deleteProduct } from '../controllers/product.controller';
-
-// const router = express.Router();
-
-// router.post('/addproduct', createProduct);         
-// router.get('/getproducts', getProducts);           
-// router.get('/getproductsbycategory/:id', getProductsByCategory);    
-// router.put('/updateproduct/:id', updateProduct);     
-// router.delete('/deleteproduct/:id', deleteProduct);  
-
-// export default router;
 
 import express from "express";
 import {
@@ -18,8 +6,8 @@ import {
   getProducts,
   updateProduct,
   deleteProduct,
+  getTopSellingProducts,
 } from "../controllers/product.controller";
-
 const router = express.Router();
 
 // Middleware wrapper for async functions
@@ -32,5 +20,12 @@ router.get("/getproducts", asyncHandler(getProducts)); // Route to get all produ
 router.get("/getproductsbycategory/:id", asyncHandler(getProductsByCategory)); // Route to get products by subcategory
 router.put("/updateproduct/:id", asyncHandler(updateProduct)); // Route to update a product
 router.delete("/deleteproduct/:id", asyncHandler(deleteProduct)); // Route to delete a product
+
+
+
+
+// Top Selling Products Endpoint
+router.get("/top", getTopSellingProducts);
+
 
 export default router;

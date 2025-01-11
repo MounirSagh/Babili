@@ -1,76 +1,84 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { ResponsiveContainer, AreaChart, XAxis, YAxis, Tooltip, Area, BarChart, Bar, Legend } from 'recharts';
 import axios from "axios";
-import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, BarChart, Bar, Legend } from "recharts";
-import LeftSideBar from "@/components/SideBar";
+import { CircularProgressbar } from 'react-circular-progressbar';
+import 'react-circular-progressbar/dist/styles.css'; // Import CSS
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import LeftSideBar from "@/components/SideBar";
 import { useUser } from "@clerk/clerk-react";
 import { useNavigate } from "react-router-dom";
 
 const baseURL = "http://localhost:3000"; 
 
 export default function AnalyticsDashboard() {
-  const { user, isLoaded } = useUser(); 
-  const navigate = useNavigate(); 
+  const { user, isLoaded } = useUser();
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    if (isLoaded && user?.publicMetadata?.role !== 'admin') {
-      navigate('/');
-    }
-  }, [isLoaded, user, navigate]);
-
-  if (!isLoaded || user?.publicMetadata?.role !== 'admin') {
-    return <h1 className="text-center mt-10">Loading...</h1>; 
-  }
-
-
-  const [timeRange, setTimeRange] = useState("7d");
-  const [salesData, setSalesData] = useState([]);
   const [totalRevenue, setTotalRevenue] = useState(0);
+  const [totalOrders, setTotalOrders] = useState(0);
   const [approvedOrders, setApprovedOrders] = useState(0);
   const [pendingOrders, setPendingOrders] = useState(0);
   const [rejectedOrders, setRejectedOrders] = useState(0);
-  const [totalOrders, setTotalOrders] = useState(0);
-  const [selectedStatus, setSelectedStatus] = useState<"Approved" | "Pending" | "Rejected">("Approved");
-  const [topProducts, setTopProducts] = useState([]);
+  const [salesData, setSalesData] = useState([]);
+  const [topProducts, setTopProducts] = useState([]); // For top selling products
+  const [timeRange, setTimeRange] = useState("7d");
+  const [previousRevenue, setPreviousRevenue] = useState(0); // Store previous period's revenue
+  const [targetRevenue, setTargetRevenue] = useState(1000000); // Set target revenue (example)
 
   useEffect(() => {
-    const fetchSalesData = async () => {
+    const fetchAnalyticsData = async () => {
       try {
-        const [analyticsResponse, ordersResponse] = await Promise.all([
-          axios.get(`${baseURL}/api/sales/analytics?timeRange=${timeRange}`),
-        axios.get(`${baseURL}/api/orders?timeRange=${timeRange}`),
-        ]);
+        const response = await axios.get(`${baseURL}/api/sales/analytics?timeRange=${timeRange}`);
+        const { approved, pending, rejected, allOrders, salesData } = response.data;
 
-        const { salesData } = analyticsResponse.data;
-        const { orders } = ordersResponse.data;
-
-
-        const approved = orders.filter((order: { status: string }) => order.status === "Approved");
-        const pending = orders.filter((order: { status: string }) => order.status === "Pending");
-        const rejected = orders.filter((order: { status: string }) => order.status === "Rejected");
-
-
-        const revenue = approved.reduce((sum: number, order: { total: number }) => sum + order.total, 0);
-
+        setApprovedOrders(approved.totalOrders);
+        setPendingOrders(pending.totalOrders);
+        setRejectedOrders(rejected.totalOrders);
+        setTotalOrders(allOrders.totalOrders);
+        setTotalRevenue(approved.totalRevenue);
+        setPreviousRevenue(allOrders.previousRevenue); // Get previous period's revenue for comparison
         setSalesData(salesData);
-        setTotalRevenue(revenue);
-        setApprovedOrders(approved.length);
-        setPendingOrders(pending.length);
-        setRejectedOrders(rejected.length);
-        setTotalOrders(orders.length);
-
-        const topProductsResponse = await axios.get(`http://localhost:3000/api/products/top?timeRange=${timeRange}`);
-        setTopProducts(topProductsResponse.data);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Error fetching analytics data:", error);
       }
     };
 
-    fetchSalesData();
+    fetchAnalyticsData();
   }, [timeRange]);
+
+  useEffect(() => {
+    const fetchTopSellingProducts = async () => {
+      try {
+        const response = await axios.get(`${baseURL}/api/products/top?timeRange=${timeRange}`);
+        setTopProducts(response.data);
+      } catch (error) {
+        console.error("Error fetching top selling products:", error);
+      }
+    };
+  
+    fetchTopSellingProducts();
+  }, [timeRange]);
+
+  // Function to calculate the percentage of the target achieved
+  const calculateTargetProgress = () => {
+    const expectedRevenue = totalRevenue + (pendingOrders * 1000); // Modify as per actual logic
+    return expectedRevenue === 0 ? 0 : (totalRevenue / expectedRevenue) * 100;
+  };
+
+  const progress = calculateTargetProgress();
+
+  // Function to calculate conversion rate
+  const conversionRate = pendingOrders ? (totalRevenue / (totalRevenue + (pendingOrders * 1000))) * 100 : 0;
+
+  // Calculate Expected Revenue as sum of approved and pending revenue
+  const expectedRevenue = totalRevenue + (pendingOrders * 1000); // Adjust for actual pending revenue
+
+  if (!isLoaded || user?.publicMetadata?.role !== 'admin') {
+    return <h1>Loading...</h1>;
+  }
 
   return (
     <div className="flex h-screen bg-gray-100">
@@ -91,96 +99,79 @@ export default function AnalyticsDashboard() {
           </Select>
         </header>
 
-
         <main className="flex-1 overflow-y-auto p-6">
-          <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-3">  
-            <Card>
+          <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-3"></div>
+            {/* Total Revenue */}
+            <Card className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-lg">
               <CardHeader>
                 <CardTitle>Total Revenue</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-gray-800">MAD {totalRevenue.toLocaleString()}</div>
+                <div className="text-4xl font-bold">{`MAD ${totalRevenue.toLocaleString()}`}</div>
+                <div className="text-lg text-gray-300">Compared to target: {progress.toFixed(2)}%</div>
               </CardContent>
             </Card>
 
-     
-            <Card>
+           
+
+          {/* Expected Revenue */}
+          <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-3 mt-5">
+            <Card className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white shadow-lg">
               <CardHeader>
-                <CardTitle>Total Orders</CardTitle>
+                <CardTitle>Expected Revenue</CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-gray-800">{totalOrders}</div>
+              <CardContent className="text-center">
+                <div className="text-5xl font-bold mb-2">{`MAD ${expectedRevenue.toLocaleString()}`}</div>
+                <div className="text-lg text-gray-200">Total expected revenue, including pending orders.</div>
               </CardContent>
             </Card>
 
-
-            <Card>
+            {/* Conversion Rate */}
+            <Card className="bg-gradient-to-r from-teal-400 to-green-500 text-white shadow-lg">
               <CardHeader>
-                <CardTitle>Order Status</CardTitle>
+                <CardTitle>Conversion Rate</CardTitle>
               </CardHeader>
-              <CardContent>
-                <Select
-                  value={selectedStatus}
-                  onValueChange={(value) => setSelectedStatus(value as "Approved" | "Pending" | "Rejected")}
-                >
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Select Status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Approved">Approved Orders</SelectItem>
-                    <SelectItem value="Pending">Pending Orders</SelectItem>
-                    <SelectItem value="Rejected">Rejected Orders</SelectItem>
-                  </SelectContent>
-                </Select>
-                <div className="mt-4 text-xl font-bold text-gray-800">
-                  {selectedStatus} Orders:{" "}
-                  {selectedStatus === "Approved"
-                    ? approvedOrders
-                    : selectedStatus === "Pending"
-                    ? pendingOrders
-                    : rejectedOrders}
+              <CardContent className="text-center">
+                <div className="text-5xl font-bold mb-2">{`${conversionRate.toFixed(2)}%`}</div>
+                <div className="text-lg text-gray-200">Percentage of total expected revenue confirmed by approved orders.</div>
+                {/* Optional: Progress bar to represent the conversion rate visually */}
+                <div className="mt-4">
+                  <div style={{ height: '10px', backgroundColor: '#e0e0e0' }}>
+                    <div
+                      style={{
+                        width: `${conversionRate}%`,
+                        height: '100%',
+                        backgroundColor: conversionRate < 50 ? "#FF0000" : "#4CAF50", // Red if below 50% and green above
+                      }}
+                    ></div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7 mt-6">
-           
-            <Card className="col-span-4">
+          {/* Sales Overview with Circular Progress Bar */}
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7 mt-5">
+            <Card className="col-span-2 bg-gradient-to-r from-white-500 to-indigo-500 text-black shadow-lg">
               <CardHeader>
                 <CardTitle>Sales Overview</CardTitle>
               </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <AreaChart data={salesData}>
-                    <XAxis dataKey="date" tickFormatter={(date) => new Date(date).toLocaleDateString()} />
-                    <YAxis />
-                    <Tooltip />
-                    <Area type="monotone" dataKey="total" stroke="#4CAF50" fill="#C8E6C9" />
-                  </AreaChart>
-                </ResponsiveContainer>
+              <CardContent className="flex justify-center items-center">
+                <div style={{ width: 150, height: 150 }}>
+                  <CircularProgressbar 
+                    value={progress} 
+                    maxValue={100} 
+                    text={`${progress.toFixed(2)}%`} 
+                    styles={{
+                      path: { stroke: progress < 50 ? "#FF0000" : "#4CAF50" },
+                      text: { fill: "#4CAF50", fontSize: "20px" },
+                    }}
+                  />
+                </div>
               </CardContent>
             </Card>
 
            
-            <Card className="col-span-3">
-              <CardHeader>
-                <CardTitle>Top Selling Products</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={topProducts}>
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="sales" fill="#8884d8" />
-                    <Bar dataKey="revenue" fill="#82ca9d" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
           </div>
         </main>
       </div>

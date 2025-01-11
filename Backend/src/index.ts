@@ -35,6 +35,7 @@ app.use('/api/sale', saleRoutes);
 app.use("/api/order", orderRoutes);
 app.use("/api/products", productRoutes);
 
+app.use("/api/sales", saleRoutes);
 
 // Error handling middleware
 app.use((err: any, req: any, res: any, next: any) => {

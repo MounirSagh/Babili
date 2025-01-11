@@ -170,15 +170,54 @@ export const generateInvoicePDF = async (data: any, filePath: string): Promise<v
   });
 };
 
-export const getOrders = async (_req: Request, res: Response) => {
+// export const getOrders = async (_req: Request, res: Response) => {
+//   try {
+//     const orders = await Order.find();
+//     res.status(200).json(orders);
+//   } catch (error) {
+//     console.error("Error fetching orders:", error);
+//     res.status(500).json({ message: "Error fetching orders", error });
+//   }
+// };
+export const getOrders = async (req: Request, res: Response) => {
   try {
-    const orders = await Order.find();
+    const { timeRange } = req.query;
+    let dateFilter = {};
+
+    if (timeRange) {
+      const now = new Date();
+      const pastDate = new Date();
+      switch (timeRange) {
+        case '7d':
+          pastDate.setDate(now.getDate() - 7);
+          break;
+        case '30d':
+          pastDate.setDate(now.getDate() - 30);
+          break;
+        case '90d':
+          pastDate.setDate(now.getDate() - 90);
+          break;
+        case '12m':
+          pastDate.setMonth(now.getMonth() - 12);
+          break;
+        default:
+          pastDate.setDate(now.getDate() - 7);
+      }
+
+      dateFilter = { date: { $gte: pastDate } };
+    }
+
+    const orders = await Order.find(dateFilter)
+      .populate('cartItems.subcategoryID', 'name')
+      .sort({ date: 1 });
+
     res.status(200).json(orders);
   } catch (error) {
-    console.error("Error fetching orders:", error);
-    res.status(500).json({ message: "Error fetching orders", error });
+    console.error('Error fetching orders:', error);
+    res.status(500).json({ message: 'Error fetching orders', error });
   }
 };
+
 
 export const getUserOrders = async (req: Request, res: Response) => {
   try {
@@ -322,12 +361,12 @@ export const updateOrderStatus = async (req: Request, res: Response) => {
       for (const item of order.cartItems) {
         const product = await Product.findById(item.productId._id);
         if (product) {
-          product.stock -= item.quantity;
-          if (product.stock < 0) {
+          if (product.stock < item.quantity) {
             return res.status(400).json({
-              message: `Insufficient stock for product ${product._id}`,
+              message: `Insufficient stock for product ${product.REF}. Available stock: ${product.stock}, Requested quantity: ${item.quantity}`,
             });
           }
+          product.stock -= item.quantity;
           await product.save();
         }
       }
@@ -345,12 +384,12 @@ export const updateOrderStatus = async (req: Request, res: Response) => {
       for (const item of order.cartItems) {
         const product = await Product.findById(item.productId._id);
         if (product) {
-          product.stock -= item.quantity;
-          if (product.stock < 0) {
+          if (product.stock < item.quantity) {
             return res.status(400).json({
-              message: `Insufficient stock for product ${product._id}`,
+              message: `Insufficient stock for product ${product.REF}. Available stock: ${product.stock}, Requested quantity: ${item.quantity}`,
             });
           }
+          product.stock -= item.quantity;
           await product.save();
         }
       }
@@ -382,6 +421,3 @@ export const updateOrderStatus = async (req: Request, res: Response) => {
     });
   }
 };
-
-
-

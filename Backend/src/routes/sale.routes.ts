@@ -1,5 +1,6 @@
 import express, { Request, Response } from "express";
-import { createSale, getSales,downloadInvoice } from "../controllers/sale.controller";
+import { createSale, getSales,downloadInvoice ,getSalesAnalytics} from "../controllers/sale.controller";
+
 
 const router = express.Router();
 
@@ -32,5 +33,9 @@ router.get("/download/:filePath", async (req: Request, res: Response) => {
     res.status(500).json({ message: "Error downloading invoice", error });
   }
 });
+
+
+router.get("/analytics", getSalesAnalytics);
+
 
 export default router;

@@ -276,7 +276,9 @@ export default function ProductPage() {
                         </TableCell>
                         <TableCell>
                           <Button
-                            className="mr-4"
+                            variant="outline"
+                            size="sm"
+                            className="mr-2"
                             onClick={() => {
                               setCurrentProduct(product);
                               setIsDialogOpen(true);
@@ -285,7 +287,8 @@ export default function ProductPage() {
                             <Pencil className="h-4 w-4" />
                           </Button>
                           <Button
-                            className="text-red-500"
+                            variant="outline"
+                            size="sm"
                             onClick={() => handleDeleteProduct(product._id!)}
                           >
                             <Trash2 className="h-4 w-4" />

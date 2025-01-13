@@ -44,11 +44,6 @@ const navigationItems: NavItemProps[] = [
     icon: <TrendingUp className="h-4 w-4" />,
   },
   {
-    label: 'Sales Analytics',
-    path: '/Admin/Sales-Analytics',
-    icon: <TrendingUp className="h-4 w-4" />,
-  },
-  {
     label: 'Notifications',
     path: '/Admin/Notifications',
     icon: <Bell className="h-4 w-4" />,

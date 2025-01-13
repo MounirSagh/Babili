@@ -232,6 +232,7 @@ export default function SubCategoryPage() {
                         <Button
                           variant="outline"
                           size="sm"
+                          className='mr-2'
                           onClick={() => {
                             setCurrentSubCategory(subcategory);
                             setIsDialogOpen(true);

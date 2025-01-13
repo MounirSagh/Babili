@@ -10,7 +10,6 @@ import Dashbord from './pages/Admin/Dashbord';
 import Products from './pages/Admin/Product';
 import Categories from './pages/Admin/Categories';
 import Sales from './pages/Admin/Sales';
-import SalesAnalytics from './pages/Admin/SalesAnalytics';
 import Subcategories from './pages/Admin/SubCategories';
 import Notifications from './pages/Admin/Notifications';
 import OrderHistoryPage from './pages/Client/OrderHistoryPage.tsx';
@@ -35,7 +34,6 @@ export default function App() {
           <Route path="/Admin/Categories" element={<Categories />} />
           <Route path="/Admin/Sales" element={<Sales />} />
           <Route path="/Admin/Subcategories" element={<Subcategories />} />
-          <Route path="/Admin/Sales-Analytics" element={<SalesAnalytics />} />
           <Route path="/Admin/Notifications" element={<Notifications />} />
           <Route path="*" element={<NotFound />} /> 
         </Routes>

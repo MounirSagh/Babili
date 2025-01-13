@@ -57,7 +57,7 @@ export const getSales = async (req: Request, res: Response) => {
 
     const sales = await Sale.find(dateFilter)
       .populate('cartItems.subcategoryID', 'name')
-      .sort({ date: 1 });
+      .sort({ date: -1 });
 
     res.status(200).json(sales);
   } catch (error) {

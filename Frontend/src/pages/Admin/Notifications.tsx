@@ -171,12 +171,7 @@ export default function NotificationsPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Notifications</SelectItem>
-                <SelectItem value="success">Success</SelectItem>
-                <SelectItem value="error">Error</SelectItem>
-                <SelectItem value="info">Info</SelectItem>
-                <SelectItem value="message">Messages</SelectItem>
                 <SelectItem value="order">Orders</SelectItem>
-                <SelectItem value="payment">Payments</SelectItem>
               </SelectContent>
             </Select>
           </div>

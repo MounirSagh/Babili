@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ResponsiveContainer, AreaChart, XAxis, YAxis, Tooltip, Area, BarChart, Bar, Legend } from 'recharts';
+import { ResponsiveContainer, BarChart, Bar, Tooltip, Legend, XAxis, YAxis } from 'recharts';
 import axios from "axios";
 import { CircularProgressbar } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css'; // Import CSS
@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import LeftSideBar from "@/components/SideBar";
 import { useUser } from "@clerk/clerk-react";
 import { useNavigate } from "react-router-dom";
+import { DollarSign, ArrowUpRight } from 'lucide-react';
 
 const baseURL = "http://localhost:3000"; 
 
@@ -23,7 +24,6 @@ export default function AnalyticsDashboard() {
   const [pendingOrders, setPendingOrders] = useState(0);
   const [rejectedOrders, setRejectedOrders] = useState(0);
   const [salesData, setSalesData] = useState([]);
-  const [topProducts, setTopProducts] = useState([]); // For top selling products
   const [timeRange, setTimeRange] = useState("7d");
   const [previousRevenue, setPreviousRevenue] = useState(0); // Store previous period's revenue
   const [targetRevenue, setTargetRevenue] = useState(1000000); // Set target revenue (example)
@@ -49,19 +49,6 @@ export default function AnalyticsDashboard() {
     fetchAnalyticsData();
   }, [timeRange]);
 
-  useEffect(() => {
-    const fetchTopSellingProducts = async () => {
-      try {
-        const response = await axios.get(`${baseURL}/api/products/top?timeRange=${timeRange}`);
-        setTopProducts(response.data);
-      } catch (error) {
-        console.error("Error fetching top selling products:", error);
-      }
-    };
-  
-    fetchTopSellingProducts();
-  }, [timeRange]);
-
   // Function to calculate the percentage of the target achieved
   const calculateTargetProgress = () => {
     const expectedRevenue = totalRevenue + (pendingOrders * 1000); // Modify as per actual logic
@@ -81,7 +68,7 @@ export default function AnalyticsDashboard() {
   }
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen bg-gray-50">
       <LeftSideBar />
       <div className="flex-1 flex flex-col overflow-hidden">
         <header className="flex items-center justify-between px-6 py-4 border-b bg-white shadow">
@@ -100,7 +87,8 @@ export default function AnalyticsDashboard() {
         </header>
 
         <main className="flex-1 overflow-y-auto p-6">
-          <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-3"></div>
+          <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-3">
+
             {/* Total Revenue */}
             <Card className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-lg">
               <CardHeader>
@@ -108,14 +96,14 @@ export default function AnalyticsDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="text-4xl font-bold">{`MAD ${totalRevenue.toLocaleString()}`}</div>
-                <div className="text-lg text-gray-300">Compared to target: {progress.toFixed(2)}%</div>
+                <div className="text-lg text-gray-300 flex items-center">
+                  Compared to target: {progress.toFixed(2)}%
+                  <ArrowUpRight className="ml-2 text-green-400" />
+                </div>
               </CardContent>
             </Card>
 
-           
-
-          {/* Expected Revenue */}
-          <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-3 mt-5">
+            {/* Expected Revenue */}
             <Card className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white shadow-lg">
               <CardHeader>
                 <CardTitle>Expected Revenue</CardTitle>
@@ -133,7 +121,7 @@ export default function AnalyticsDashboard() {
               </CardHeader>
               <CardContent className="text-center">
                 <div className="text-5xl font-bold mb-2">{`${conversionRate.toFixed(2)}%`}</div>
-                <div className="text-lg text-gray-200">Percentage of total expected revenue confirmed by approved orders.</div>
+                <div className="text-lg text-gray-200">%%</div>
                 {/* Optional: Progress bar to represent the conversion rate visually */}
                 <div className="mt-4">
                   <div style={{ height: '10px', backgroundColor: '#e0e0e0' }}>
@@ -170,8 +158,6 @@ export default function AnalyticsDashboard() {
                 </div>
               </CardContent>
             </Card>
-
-           
           </div>
         </main>
       </div>

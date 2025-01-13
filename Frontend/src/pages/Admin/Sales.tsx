@@ -79,6 +79,7 @@ export default function AdminSalesPage() {
   const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [dateFilter, setDateFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
 
   const fetchOrders = async () => {
     try {
@@ -127,13 +128,18 @@ export default function AdminSalesPage() {
   const filteredOrders = orders.filter((order) => {
     const matchesSearch = `${order.userDetails.firstName} ${order.userDetails.lastName}`
       .toLowerCase()
-      .includes(searchQuery.toLowerCase()) || order._id.toLowerCase().includes(searchQuery.toLowerCase());
+      .includes(searchQuery.toLowerCase()) || 
+      order._id.toLowerCase().includes(searchQuery.toLowerCase());
 
     const matchesDate = dateFilter
       ? new Date(order.date).toISOString().split('T')[0] === dateFilter
       : true;
 
-    return matchesSearch && matchesDate;
+    const matchesStatus = statusFilter
+      ? order.status === statusFilter
+      : true;
+
+    return matchesSearch && matchesDate && matchesStatus;
   });
 
   return (
@@ -156,20 +162,30 @@ export default function AdminSalesPage() {
                   placeholder="Search by customer name or order ID"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-1/2 border border-gray-300 focus:border-blue-500 rounded-md"
+                  className="flex-1 border border-gray-300 focus:border-blue-500 rounded-md"
                 />
                 <Input
                   type="date"
                   placeholder="Filter by date"
                   value={dateFilter}
                   onChange={(e) => setDateFilter(e.target.value)}
-                  className="w-1/2 border border-gray-300 focus:border-blue-500 rounded-md"
+                  className="flex-1 border border-gray-300 focus:border-blue-500 rounded-md"
                 />
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="flex-1 border border-gray-300 focus:border-blue-500 rounded-md h-10 px-3 bg-white"
+                >
+                  <option value="">Filter by Status</option>
+                  <option value="Pending">Pending</option>
+                  <option value="Approved">Approved</option>
+                  <option value="Rejected">Rejected</option>
+                </select>
               </div>
               {isLoading ? (
                 <p className="text-center text-gray-500">Loading orders...</p>
               ) : filteredOrders.length > 0 ? (
-                filteredOrders.map((order) => (
+                [...filteredOrders].reverse().map((order) => (
                   <div key={order._id} className="mb-4 bg-white rounded-lg shadow-sm p-6 border border-gray-200">
                     <div className="flex justify-between items-center">
                       <div>

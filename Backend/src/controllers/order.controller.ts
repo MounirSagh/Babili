@@ -207,9 +207,19 @@ export const getOrders = async (req: Request, res: Response) => {
       dateFilter = { date: { $gte: pastDate } };
     }
 
+    // Add console.log to see what's being queried
+    console.log('Date Filter:', dateFilter);
+
     const orders = await Order.find(dateFilter)
       .populate('cartItems.subcategoryID', 'name')
-      .sort({ date: 1 });
+      .sort({ date: -1, _id: -1 })
+      .lean(); // Add lean() for better performance
+
+    // Log the dates to verify sorting
+    console.log('Order dates:', orders.map(order => ({
+      id: order._id,
+      date: order.date
+    })));
 
     res.status(200).json(orders);
   } catch (error) {

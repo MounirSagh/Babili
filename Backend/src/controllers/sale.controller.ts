@@ -28,9 +28,10 @@ export const createSale = async (req: Request, res: Response) => {
 
 export const getSales = async (req: Request, res: Response) => {
   try {
-    const { timeRange } = req.query;
-    let dateFilter = {};
+    const { timeRange, status } = req.query;
+    let dateFilter: any = {};
 
+    // Time range filter
     if (timeRange) {
       const now = new Date();
       const pastDate = new Date();
@@ -52,12 +53,17 @@ export const getSales = async (req: Request, res: Response) => {
           pastDate.setDate(now.getDate() - 7);
       }
 
-      dateFilter = { date: { $gte: pastDate } };
+      dateFilter.date = { $gte: pastDate };
+    }
+
+    // Status filter
+    if (status && ['Pending', 'Approved', 'Rejected'].includes(status as string)) {
+      dateFilter.status = status;
     }
 
     const sales = await Sale.find(dateFilter)
       .populate('cartItems.subcategoryID', 'name')
-      .sort({ date: 1 });
+      .sort({ date: -1 });
 
     res.status(200).json(sales);
   } catch (error) {

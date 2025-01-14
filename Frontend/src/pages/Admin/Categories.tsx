@@ -36,14 +36,12 @@ import { Badge } from "@/components/ui/badge";
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react';
 
-
 interface Category {
   _id: string;
   name: string;
   description: string;
   productCount: number;
 }
-
 
 interface SubCategory {
   _id: string;
@@ -53,8 +51,8 @@ interface SubCategory {
 }
 
 export default function CategoryPage() {
-  const { user, isLoaded } = useUser(); 
-  const navigate = useNavigate(); 
+  const { user, isLoaded } = useUser();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (isLoaded && user?.publicMetadata?.role !== 'admin') {
@@ -63,9 +61,8 @@ export default function CategoryPage() {
   }, [isLoaded, user, navigate]);
 
   if (!isLoaded || user?.publicMetadata?.role !== 'admin') {
-    return <h1 className="text-center mt-10">Loading...</h1>; 
+    return <h1 className="text-center mt-10">Loading...</h1>;
   }
-
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -73,12 +70,10 @@ export default function CategoryPage() {
   const [currentCategory, setCurrentCategory] = useState<Category | null>(null);
   const [subCategories, setSubCategories] = useState<Record<string, SubCategory[]>>({});
 
-
   const fetchCategoriesWithSubCategories = async () => {
     try {
       const categoryResponse = await axios.get('http://localhost:3000/api/categories/getcategories');
       const fetchedCategories = categoryResponse.data;
-
 
       const subCategoryPromises = fetchedCategories.map((category: Category) =>
         axios
@@ -88,7 +83,6 @@ export default function CategoryPage() {
 
       const subCategoryResults = await Promise.all(subCategoryPromises);
 
- 
       const subCategoryMap = subCategoryResults.reduce(
         (acc, result) => ({ ...acc, [result.categoryID]: result.subCategories }),
         {}
@@ -135,8 +129,7 @@ export default function CategoryPage() {
   };
 
   const filteredCategories = categories.filter((category) =>
-    category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    category.description.toLowerCase().includes(searchQuery.toLowerCase())
+    category.name.toLowerCase().includes(searchQuery.toLowerCase()) // Search only by category name
   );
 
   return (
@@ -194,8 +187,7 @@ export default function CategoryPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Name</TableHead>
-                    <TableHead>Description</TableHead>
-                    <TableHead>Subategories</TableHead>
+                    <TableHead>Subcategories</TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -208,7 +200,6 @@ export default function CategoryPage() {
                           {category.name}
                         </div>
                       </TableCell>
-                      <TableCell>{category.description}</TableCell>
                       <TableCell>
                         <Badge variant="secondary"> {subCategories[category._id]?.length || 0}</Badge>
                       </TableCell>
@@ -245,16 +236,13 @@ export default function CategoryPage() {
   );
 }
 
-
 interface CategoryFormProps {
   initialData: Partial<Omit<Category, 'productCount'>> | null;
   onSubmit: (data: Partial<Omit<Category, '_id' | 'productCount'>>) => void;
 }
 
 function CategoryForm({ initialData, onSubmit }: CategoryFormProps) {
-  const [formData, setFormData] = useState<Partial<Omit<Category, '_id' | 'productCount'>>>(
-    initialData || { name: '', description: '' }
-  );
+  const [formData, setFormData] = useState<Partial<Omit<Category, '_id' | 'productCount'>>>(initialData || { name: '', description: '' });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -282,19 +270,6 @@ function CategoryForm({ initialData, onSubmit }: CategoryFormProps) {
             required
           />
         </div>
-        <div className="grid grid-cols-4 items-center gap-4">
-          <Label htmlFor="description" className="text-right">
-            Description
-          </Label>
-          <Textarea
-            id="description"
-            name="description"
-            value={formData.description || ''}
-            onChange={handleChange}
-            className="col-span-3"
-            rows={3}
-          />
-        </div>
       </div>
       <DialogFooter>
         <Button type="submit">{initialData ? 'Update Category' : 'Add Category'}</Button>
@@ -302,4 +277,3 @@ function CategoryForm({ initialData, onSubmit }: CategoryFormProps) {
     </form>
   );
 }
-

@@ -6,6 +6,8 @@ import { Plus, Pencil, Trash2 } from 'lucide-react';
 import LeftSideBar from '@/components/SideBar';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Trash } from 'lucide-react'; // Import Trash icon
+
 import {
   Card,
   CardContent,
@@ -187,13 +189,14 @@ export default function ProductPage() {
     }
   };
 
-  const filteredProducts = products.filter(
-    (product) =>
-      product.REF.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      subCategories.find((sc) => sc._id === product.subcategoryID)?.name
-        ?.toLowerCase()
-        .includes(searchQuery.toLowerCase())
-  );
+ // Filter products by either REF or subcategory name
+ const filteredProducts = products.filter(
+  (product) =>
+    product.REF.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    subCategories.find((sc) => sc._id === product.subcategoryID)?.name
+      ?.toLowerCase()
+      .includes(searchQuery.toLowerCase())
+);
 
   return (
     <div className="flex h-screen bg-background">
@@ -347,6 +350,13 @@ function ProductForm({ subCategories, initialData, onSubmit }: ProductFormProps)
     }));
   };
 
+  const handleRemoveAttribute = (index: number) => {
+    setFormData((prev) => {
+      const updatedAttributes = prev.attributes?.filter((_, i) => i !== index);
+      return { ...prev, attributes: updatedAttributes || [] };
+    });
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit(formData);
@@ -424,18 +434,25 @@ function ProductForm({ subCategories, initialData, onSubmit }: ProductFormProps)
         <div className="col-span-2">
           <h4 className="text-md font-bold">Attributes</h4>
           {formData.attributes?.map((attr, index) => (
-            <div key={index} className="grid grid-cols-2 gap-2 mb-2">
-              <Input
-                placeholder="Key"
-                value={attr.key}
-                onChange={(e) => handleAttributesChange(index, e.target.value, attr.value)}
-              />
-              <Input
-                placeholder="Value"
-                value={attr.value}
-                onChange={(e) => handleAttributesChange(index, attr.key, e.target.value)}
-              />
-            </div>
+            <div className="grid grid-cols-[1fr_1fr_auto] items-center gap-2">
+            <Input
+              placeholder="Key"
+              value={attr.key}
+              onChange={(e) => handleAttributesChange(index, e.target.value, attr.value)}
+              className="w-full"
+            />
+            <Input
+              placeholder="Value"
+              value={attr.value}
+              onChange={(e) => handleAttributesChange(index, attr.key, e.target.value)}
+              className="w-full"
+            />
+            <Trash
+              className="h-5 w-5 text-red-500 cursor-pointer hover:text-red-700"
+              onClick={() => handleRemoveAttribute(index)} // Remove attribute on click
+            />
+          </div>
+          
           ))}
           <Button type="button" onClick={addAttribute} className="mt-2">
             Add Attribute

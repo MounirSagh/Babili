@@ -27,7 +27,18 @@ export default function AnalyticsDashboard() {
   const [previousRevenue, setPreviousRevenue] = useState(0);
   const [topProducts, setTopProducts] = useState([]);
   const [targetRevenue, setTargetRevenue] = useState(1000000);
-  const [orders, setOrders] = useState([]);
+  interface Order {
+    _id: string;
+    userDetails: {
+      firstName: string;
+      lastName: string;
+    };
+    date: string;
+    totalPrice: number;
+    status: string;
+  }
+
+  const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -87,6 +98,11 @@ export default function AnalyticsDashboard() {
     { name: "Pending", value: pendingOrders, color: "#FBBF24" },
     { name: "Rejected", value: rejectedOrders, color: "#F87171" },
   ];
+
+  // Sort orders by date in descending order and get the last 10 orders
+  const last10Orders = orders
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()) // Sort by date descending
+    .slice(0, 10); // Get the last 10 orders
 
   return (
     <div className="flex h-screen bg-white">
@@ -165,7 +181,7 @@ export default function AnalyticsDashboard() {
             </Card>
           </div>
 
-          <div className="mt-8">
+         <div className="mt-8">
             <h2 className="text-xl font-semibold mb-4">Last 10 Orders</h2>
             <div className="overflow-x-auto">
               <Table>
@@ -179,7 +195,7 @@ export default function AnalyticsDashboard() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {orders.slice(0, 10).map((order: any) => (
+                  {last10Orders.map((order: any) => (
                     <TableRow key={order._id}>
                       <TableCell>{order._id}</TableCell>
                       <TableCell>{`${order.userDetails.firstName} ${order.userDetails.lastName}`}</TableCell>

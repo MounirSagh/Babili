@@ -207,7 +207,6 @@
 //   );
 // }
 
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -219,31 +218,27 @@ import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { SignedIn} from '@clerk/clerk-react'
-
-
-
+import { SignedIn, SignedOut } from "@clerk/clerk-react";
 
 export default function Component() {
   const navigate = useNavigate();
   const location = useLocation();
-  const subcategory = location.state?.product; 
-  const subcategoryID = subcategory?._id; 
+  const subcategory = location.state?.product;
+  const subcategoryID = subcategory?._id;
 
   const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [quantity, setQuantity] = useState(1);
 
-
   useEffect(() => {
     if (!subcategory) {
       console.error("Subcategory is undefined. Redirecting to Home.");
-      navigate("/"); 
+      navigate("/");
     }
   }, [subcategory, navigate]);
 
   const fetchProducts = async () => {
-    if (!subcategoryID) return; 
+    if (!subcategoryID) return;
     try {
       const response = await axios.get(
         `http://localhost:3000/api/product/getproductsbycategory/${subcategoryID}`
@@ -269,14 +264,21 @@ export default function Component() {
       return;
     }
 
+    if (quantity > selectedProduct.stock) {
+      toast.warn(
+        `The quantity selected exceeds the available stock. Only ${selectedProduct.stock} items are available.`
+      );
+      return;
+    }
+
     try {
       const payload = {
-        productId: product._id, 
+        productId: product._id,
         attributes: product.attributes,
-        quantity: quantity, 
+        quantity: quantity,
       };
 
-      console.log("Payload for AddToCart:", payload); 
+      console.log("Payload for AddToCart:", payload);
       await axios.post("http://localhost:3000/api/cart/addcart", payload);
       toast.success("Item added to cart successfully!");
     } catch (error) {
@@ -310,21 +312,20 @@ export default function Component() {
               />
             </div>
 
- 
             <div className="md:w-1/2 p-8">
               <h1 className="text-4xl font-bold text-gray-800 mb-4">{subcategory.name}</h1>
               <p className="text-sm text-gray-500 mb-4">
                 Select from the available References table below to customize your product.
               </p>
 
-       
               <div className="mb-4">
                 <label className="text-sm font-medium text-gray-600 mb-2 block">References:</label>
                 <select
+                  value={selectedProduct?._id || ""}
                   onChange={(e) => handleSelect(e.target.value)}
                   className="border rounded-lg px-4 py-2 w-full focus:ring focus:ring-blue-300"
                 >
-                  <option value="" disabled selected>
+                  <option value="" disabled>
                     Select a product
                   </option>
                   {products.map((product: any) => (
@@ -368,7 +369,7 @@ export default function Component() {
                 />
               </div>
 
-             
+              {/* Add to Cart Button */}
               <SignedIn>
                 <div>
                   <Button
@@ -380,10 +381,23 @@ export default function Component() {
                   </Button>
                 </div>
               </SignedIn>
+
+              <SignedOut>
+                <div>
+                  <Button
+                    onClick={() => toast.warn("Please sign in to add items to the cart.")}
+                    className="bg-blue-500 hover:bg-blue-600 text-white font-bold w-full py-3 text-lg rounded-lg shadow-lg"
+                    disabled
+                  >
+                    <ShoppingCart className="mr-2 h-5 w-5" />
+                    Add to Cart (Sign In Required)
+                  </Button>
+                </div>
+              </SignedOut>
             </div>
           </div>
 
-   
+          {/* Reference Table */}
           <div className="mt-12 bg-white p-8 shadow-md rounded-lg">
             <h2 className="text-xl font-bold text-gray-800 mb-4">Reference table</h2>
             {subcategory.tableImage ? (

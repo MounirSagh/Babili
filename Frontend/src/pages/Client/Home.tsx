@@ -120,9 +120,9 @@ export default function Component() {
             <h1 className="text-4xl md:text-6xl font-extrabold mb-6 drop-shadow-lg">
               A WONDERFUL GIFT
             </h1>
-            <button className="px-6 py-3 text-lg font-semibold bg-blue-600 rounded-full hover:bg-blue-700 transition duration-300 shadow-lg">
+            <a href='https://babilipeche.ma' className="px-6 py-3 text-lg font-semibold bg-blue-600 rounded-full hover:bg-blue-700 transition duration-300 shadow-lg">
               LEARN MORE
-            </button>
+            </a>
           </div>
         </div>
 
@@ -183,31 +183,31 @@ export default function Component() {
             {filteredSubcategories.length > 0 ? (
               filteredSubcategories.map((subcategory) => (
                <Card className="flex flex-col h-full shadow-lg hover:shadow-xl transition-shadow">
-  <CardHeader>
-    <img
-      src={subcategory.image}
-      alt={subcategory.name}
-      className="w-full h-48 object-cover rounded-t-md"
-      onError={(e) => {
-        e.currentTarget.src = "/path-to-placeholder.jpg";
-      }}
-    />
-  </CardHeader>
-  <CardContent className="p-4 flex-grow">
-    <CardTitle className="text-lg font-semibold">{subcategory.name}</CardTitle>
-    <p className="text-sm text-gray-600">
-      {categories.find((category) => category._id === subcategory.categoryID)?.name}
-    </p>
-  </CardContent>
-  <CardFooter className={`p-4 mt-auto ${filteredSubcategories.length === 1 ? 'pt-4' : 'mt-auto'}`}>
-    <Button
-      onClick={() => navigate("/Details", { state: { product: subcategory } })}
-      className="w-full bg-blue-500 text-white hover:bg-blue-600 transition"
-    >
-      View Details
-    </Button>
-  </CardFooter>
-</Card>
+                <CardHeader>
+                  <img
+                    src={subcategory.image}
+                    alt={subcategory.name}
+                    className="w-full h-48 object-cover rounded-t-md"
+                    onError={(e) => {
+                      e.currentTarget.src = "/path-to-placeholder.jpg";
+                    }}
+                  />
+                </CardHeader>
+                <CardContent className="p-4 flex-grow">
+                  <CardTitle className="text-lg font-semibold">{subcategory.name}</CardTitle>
+                  <p className="text-sm text-gray-600">
+                    {categories.find((category) => category._id === subcategory.categoryID)?.name}
+                  </p>
+                </CardContent>
+                <CardFooter className={`p-4 mt-auto ${filteredSubcategories.length === 1 ? 'pt-4' : 'mt-auto'}`}>
+                  <Button
+                    onClick={() => navigate("/Details", { state: { product: subcategory } })}
+                    className="w-full bg-blue-500 text-white hover:bg-blue-600 transition"
+                  >
+                    View Details
+                  </Button>
+                </CardFooter>
+              </Card>
 
               ))
             ) : (

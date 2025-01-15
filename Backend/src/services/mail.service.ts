@@ -15,18 +15,17 @@ export async function sendApprovalEmailService(toEmail: string) {
   transporter.sendMail({
     from: "m.saghfary@aui.ma",
     to: toEmail,
-    subject: "Your Order Has Been Approved ⭐",
+    subject: "Your Order Has Been Approved ✅",
     html: `
       <!DOCTYPE html>
       <html lang="en">
-
         <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>Order Approval</title>
             <style>
                 body {
-                    font-family: 'Times New Roman', Times, serif;
+                    font-family: 'Arial', sans-serif;
                     line-height: 1.6;
                     color: #333;
                     font-size: 16px;
@@ -34,26 +33,23 @@ export async function sendApprovalEmailService(toEmail: string) {
                 }
 
                 h2 {
-                    color: #007bff;
+                    color: #28a745;
                 }
             </style>
         </head>
 
         <body>
+            <h2>✅ Your Order Has Been Approved!</h2>
 
-            <h2>🌟 Thank You for Trusting Bably!</h2>
+            <p>Dear Customer,</p>
 
-            <p>Dear Friend,</p>
+            <p>We’re happy to inform you that your order has been approved. Please reply to this email with your full name and address to confirm your order.</p>
 
-            <p>This is to let you know that your order has been well approved!</p>
+            <p>Thank you for choosing Babily!</p>
 
-            <p>Please Reply to this email by your full name and address to confirm your oder</p>
-
-            <p>Best wishes!</p>
-
+            <p>Best regards, <br> The Babily Team</p>
         </body>
-
-    </html>
+      </html>
     `,
   }, (err: any, info: SentMessageInfo) => {
     if (err) {
@@ -66,23 +62,73 @@ export async function sendApprovalEmailService(toEmail: string) {
 }
 
 
+export async function sendRejectionEmailService(toEmail: string) {
+  console.log(toEmail)
+  transporter.sendMail({
+    from: "m.saghfary@aui.ma",
+    to: toEmail,
+    subject: "Your Order Request Cannot Be Fulfilled ❌",
+    html: `
+      <!DOCTYPE html>
+      <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Order Rejection</title>
+            <style>
+                body {
+                    font-family: 'Arial', sans-serif;
+                    line-height: 1.6;
+                    color: #333;
+                    font-size: 16px;
+                    margin: 20px;
+                }
+
+                h2 {
+                    color: #dc3545;
+                }
+            </style>
+        </head>
+
+        <body>
+            <h2>❌ We’re Unable to Fulfill Your Order</h2>
+
+            <p>Dear Customer,</p>
+
+            <p>Unfortunately, we are unable to approve your order at this time. Please contact our support team for more information.</p>
+
+            <p>We appreciate your understanding and look forward to serving you in the future.</p>
+
+            <p>Best regards, <br> The Babily Team</p>
+        </body>
+      </html>
+    `,
+  }, (err: any, info: SentMessageInfo) => {
+    if (err) {
+      console.error(err, "Error sending email");
+      return;
+    }
+
+    console.info(`Preview URL: ${getTestMessageUrl(info)}`)
+  });
+}
+
 export async function sendConfirmationEmailService(toEmail: string) {
   console.log(toEmail)
   transporter.sendMail({
     from: "m.saghfary@aui.ma",
     to: toEmail,
-    subject: "Your Order Has Been Place ⭐",
+    subject: "Your Order Request Has Been Received 📦",
     html: `
       <!DOCTYPE html>
       <html lang="en">
-
-              <head>
+        <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Order Rquest Confirmation</title>
+            <title>Order Confirmation</title>
             <style>
                 body {
-                    font-family: 'Times New Roman', Times, serif;
+                    font-family: 'Arial', sans-serif;
                     line-height: 1.6;
                     color: #333;
                     font-size: 16px;
@@ -96,20 +142,17 @@ export async function sendConfirmationEmailService(toEmail: string) {
         </head>
 
         <body>
+            <h2>📦 Order Request Received!</h2>
 
-            <h2>🌟 Thank You for Trustng Babily!</h2>
+            <p>Dear Customer,</p>
 
-            <p>Dear Friend,</p>
+            <p>Your order request has been successfully received. Our team will review your request and get back to you shortly.</p>
 
-            <p>This is to let you know that your request for an order has been well processed!</p>
+            <p>Thank you for choosing Babily. We’re excited to serve you!</p>
 
-            <p>Your inquiry is forwarded to those in charge, who will follow-up with you accordingly</p>
-
-            <p>Best wishes!</p>
-            
+            <p>Best regards, <br> The Babily Team</p>
         </body>
-
-    </html>
+      </html>
     `,
   }, (err: any, info: SentMessageInfo) => {
     if (err) {

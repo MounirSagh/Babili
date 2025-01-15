@@ -115,6 +115,12 @@ export default function AdminSalesPage() {
         });
         alert("Order status updated and confirmation email sent.");
       }
+      if (status === "Rejected") {
+        await axios.post("http://localhost:3000/api/mail/rejection", {
+          toEmail: updatedOrder.userDetails.email, 
+        });
+        alert("Order status updated and confirmation email sent.");
+      }
     } catch (error) {
       console.error("Error updating order status:", error);
       alert("Failed to update order status. Please try again.");

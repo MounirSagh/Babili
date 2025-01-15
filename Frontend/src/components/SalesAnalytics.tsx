@@ -84,7 +84,7 @@ export default function AnalyticsDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold">{`MAD ${totalRevenue.toLocaleString()}`}</div>
-                <div className="text-lg mt-1">Progress: {progress.toFixed(2)}%</div>
+                
               </CardContent>
             </Card>
 
@@ -103,12 +103,12 @@ export default function AnalyticsDashboard() {
                 <CardTitle>Conversion Rate</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold">{`${conversionRate.toFixed(2)}%`}</div>
+                <div className="text-3xl font-bold">{`${progress.toFixed(2)}%%`}</div>
                 <div className="mt-4">
                   <div className="h-2 bg-gray-300 rounded-full">
                     <div
-                      className={`h-full rounded-full ${conversionRate < 50 ? "bg-red-500" : "bg-green-500"}`}
-                      style={{ width: `${conversionRate}%` }}
+                      className={`h-full rounded-full ${progress < 50 ? "bg-red-500" : "bg-green-500"}`}
+                      style={{ width: `${progress}%` }}
                     ></div>
                   </div>
                 </div>

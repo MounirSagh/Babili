@@ -72,7 +72,7 @@ export default function OrderHistoryPage() {
       const matchesSearch = order.cartItems.some((item) =>
         item.productId?.subcategoryID?.name
           ?.toLowerCase()
-          .includes(searchTerm.toLowerCase())
+          .includes(searchTerm.toLowerCase()) || order._id.includes(searchTerm) // Check for both subcategory name and order ID match
       );
       const matchesStatus = statusFilter === "All" || order.status === statusFilter;
       const matchesStartDate =
@@ -80,7 +80,9 @@ export default function OrderHistoryPage() {
       const matchesEndDate =
         !endDate || new Date(order.date) <= new Date(endDate);
 
-      return matchesSearch && matchesStatus && matchesStartDate && matchesEndDate;
+      return (
+        matchesSearch && matchesStatus && matchesStartDate && matchesEndDate
+      );
     });
 
     setFilteredOrders(filtered);
@@ -100,7 +102,7 @@ export default function OrderHistoryPage() {
             {/* Filters */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
               <Input
-                placeholder="Search by subcategory name"
+                placeholder="Search by Order ID or Subcategory name"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full"
@@ -168,7 +170,10 @@ export default function OrderHistoryPage() {
                   </TableHeader>
                   <TableBody>
                     {filteredOrders.map((order) => (
-                      <TableRow key={order._id} className="hover:bg-gray-50 transition duration-300">
+                      <TableRow
+                        key={order._id}
+                        className="hover:bg-gray-50 transition duration-300"
+                      >
                         <TableCell className="py-4 px-6 text-gray-800 font-medium">
                           {order._id}
                         </TableCell>

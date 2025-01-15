@@ -60,6 +60,12 @@ export default function InvoiceOrderPage() {
     setUserDetails((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handlePhoneInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Allow only numbers to be entered in the phone input
+    const value = e.target.value.replace(/[^0-9]/g, ""); // Remove non-numeric characters
+    setUserDetails((prev) => ({ ...prev, phone: value }));
+  };
+
   const handlePlaceOrder = async () => {
     setIsLoading(true); 
     try {
@@ -175,7 +181,7 @@ export default function InvoiceOrderPage() {
                         name="phone"
                         type="tel"
                         value={userDetails.phone}
-                        onChange={handleInputChange}
+                        onChange={handlePhoneInput} // Use the custom handler for phone input
                         required
                       />
                     </div>

@@ -71,7 +71,8 @@ export default function Component() {
     fetchSubCategories();
   }, []);
 
-  const applyFilters = () => {
+  // This useEffect will apply filters based on the search term and selected categories
+  useEffect(() => {
     const filtered = subcategories.filter(
       (subcategory) =>
         subcategory.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
@@ -79,6 +80,12 @@ export default function Component() {
           selectedCategories.includes(subcategory.categoryID))
     );
     setFilteredSubcategories(filtered);
+  }, [searchTerm, selectedCategories, subcategories]);
+
+  const resetFilters = () => {
+    setSearchTerm("");
+    setSelectedCategories([]);
+    setFilteredSubcategories(subcategories); // Reset to original subcategories
   };
 
   const handleCategoryChange = (categoryId: string) => {
@@ -113,9 +120,9 @@ export default function Component() {
             <h1 className="text-4xl md:text-6xl font-extrabold mb-6 drop-shadow-lg">
               A WONDERFUL GIFT
             </h1>
-            <button className="px-6 py-3 text-lg font-semibold bg-blue-600 rounded-full hover:bg-blue-700 transition duration-300 shadow-lg">
+            <a href='https://babilipeche.ma' className="px-6 py-3 text-lg font-semibold bg-blue-600 rounded-full hover:bg-blue-700 transition duration-300 shadow-lg">
               LEARN MORE
-            </button>
+            </a>
           </div>
         </div>
 
@@ -164,20 +171,18 @@ export default function Component() {
               )}
             </div>
             <Button
-              onClick={applyFilters}
-              className="w-full bg-blue-600 text-white hover:bg-blue-700 transition-all"
+              onClick={resetFilters}
+              className="w-full bg-gray-600 text-white hover:bg-gray-700 transition-all"
             >
-              Apply Filters
+              Reset Filters
             </Button>
           </aside>
 
           {/* Subcategories */}
-          <div className="w-full md:w-3/4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {filteredSubcategories.map((subcategory) => (
-              <Card
-                key={subcategory._id}
-                className="flex flex-col h-full shadow-lg hover:shadow-xl transition-shadow"
-              >
+          <div className="w-full md:w-3/4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 justify-center">
+            {filteredSubcategories.length > 0 ? (
+              filteredSubcategories.map((subcategory) => (
+               <Card className="flex flex-col h-full shadow-lg hover:shadow-xl transition-shadow">
                 <CardHeader>
                   <img
                     src={subcategory.image}
@@ -194,18 +199,20 @@ export default function Component() {
                     {categories.find((category) => category._id === subcategory.categoryID)?.name}
                   </p>
                 </CardContent>
-                <CardFooter className="p-4 mt-auto">
+                <CardFooter className={`p-4 mt-auto ${filteredSubcategories.length === 1 ? 'pt-4' : 'mt-auto'}`}>
                   <Button
-                    onClick={() =>
-                      navigate("/Details", { state: { product: subcategory } })
-                    }
+                    onClick={() => navigate("/Details", { state: { product: subcategory } })}
                     className="w-full bg-blue-500 text-white hover:bg-blue-600 transition"
                   >
                     View Details
                   </Button>
                 </CardFooter>
               </Card>
-            ))}
+
+              ))
+            ) : (
+              <div className="w-full text-center text-lg text-gray-500">No items found</div>
+            )}
           </div>
         </div>
       </main>

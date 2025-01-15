@@ -1,12 +1,13 @@
-'use client';
+"use client";
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { MinusCircle, PlusCircle } from "lucide-react";
+import { MinusCircle, PlusCircle, Trash } from "lucide-react";  // Import Trash icon for delete
 import NavBar from "@/components/NavBar";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 type Attribute = {
   key: string;
@@ -27,7 +28,6 @@ type CartItem = {
 };
 
 export default function CartPage() {
-  
   const navigate = useNavigate();
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [totalPrice, setTotalPrice] = useState<number>(0);
@@ -102,6 +102,17 @@ export default function CartPage() {
     }
   };
 
+  const handleDeleteItem = async (itemId: string) => {
+    try {
+      await axios.delete(`http://localhost:3000/api/cart/deletefromcart/${itemId}`);
+      setCartItems(cartItems.filter((c) => c._id !== itemId));  // Remove item from the cart
+      toast.success("Item removed from cart!");
+    } catch (error) {
+      console.error("Error deleting item from cart:", error);
+      toast.error("Failed to remove item.");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white">
       <NavBar />
@@ -131,7 +142,9 @@ export default function CartPage() {
                     <TableCell>{item.productId?.subcategoryID?.name || "N/A"}</TableCell>
                     <TableCell>{item.quantity}</TableCell>
                     <TableCell>
-                      {item.productId?.price ? `MAD ${(item.productId.price * item.quantity).toFixed(2)}` : "N/A"}
+                      {item.productId?.price
+                        ? `MAD ${(item.productId.price * item.quantity).toFixed(2)}`
+                        : "N/A"}
                     </TableCell>
                     <TableCell>
                       {item.productId?.attributes?.length > 0 ? (
@@ -148,12 +161,30 @@ export default function CartPage() {
                     </TableCell>
                     <TableCell>
                       <div className="flex space-x-2">
-                        <Button onClick={() => handleAddUpdateCart(item)}>
-                          <PlusCircle className="h-4 w-4" />
-                        </Button>
-                        <Button onClick={() => handleMinusUpdateCart(item)}>
-                          <MinusCircle className="h-4 w-4" />
-                        </Button>
+                      <Button
+  onClick={() => handleAddUpdateCart(item)}
+  className="bg-green-600 hover:bg-green-700 text-white font-bold p-2 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105"
+>
+  <PlusCircle className="h-6 w-6" />
+  <span className="sr-only">Add to Cart</span>
+</Button>
+
+<Button
+  onClick={() => handleMinusUpdateCart(item)}
+  className="bg-gray-600 hover:bg-gray-700 text-white font-bold p-2 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105"
+>
+  <MinusCircle className="h-6 w-6" />
+  <span className="sr-only">Remove from Cart</span>
+</Button>
+
+<Button
+  onClick={() => handleDeleteItem(item._id)}
+  className="bg-red-600 hover:bg-red-700 text-white font-bold p-2 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105"
+>
+  <Trash className="h-6 w-6" />
+  <span className="sr-only">Delete Item</span>
+</Button>
+
                       </div>
                     </TableCell>
                   </TableRow>

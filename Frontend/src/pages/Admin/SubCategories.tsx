@@ -1,5 +1,4 @@
 'use client';
-
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Plus, Pencil, Trash2 } from 'lucide-react';
@@ -33,7 +32,6 @@ import { Label } from "@/components/ui/label";
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react';
 
-
 interface Category {
   _id: string;
   name: string;
@@ -52,21 +50,19 @@ export default function SubCategoryPage() {
 
   useEffect(() => {
     if (isLoaded && user?.publicMetadata?.role !== 'admin') {
-      navigate('/');
+      navigate('/'); // Redirect non-admin users
     }
   }, [isLoaded, user, navigate]);
 
   if (!isLoaded || user?.publicMetadata?.role !== 'admin') {
-    return <h1 className="text-center mt-10">Loading...</h1>; 
+    return <h1 className="text-center mt-10">Loading...</h1>;
   }
-
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [subCategories, setSubCategories] = useState<SubCategory[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [currentSubCategory, setCurrentSubCategory] = useState<Partial<SubCategory> | null>(null);
-
 
   const fetchCategories = async () => {
     try {
@@ -94,7 +90,6 @@ export default function SubCategoryPage() {
 
   const getProductCountBySubCategory = async (subcategoryID: string): Promise<number> => {
     try {
-      console.log("hhh", subcategoryID)
       const response = await axios.get(
         `http://localhost:3000/api/product/getproductsbycategory/${subcategoryID}`
       );
@@ -167,7 +162,7 @@ export default function SubCategoryPage() {
             <form onSubmit={(e) => e.preventDefault()} className="relative">
               <Input
                 type="search"
-                placeholder="Search subcategories..."
+                placeholder="Search subcategories or categories..."
                 className="w-64"
                 value={searchQuery}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
@@ -259,7 +254,6 @@ export default function SubCategoryPage() {
     </div>
   );
 }
-
 
 interface SubCategoryFormProps {
   categories: Category[];

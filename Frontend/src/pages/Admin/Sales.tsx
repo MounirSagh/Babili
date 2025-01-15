@@ -21,7 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { downloadInvoice } from "@/utils/invoice";
 import { useUser } from '@clerk/clerk-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import AnalyticsDashboard from '@/components/SalesAnalytics';
 
 type Attribute = {
@@ -62,12 +62,29 @@ type Order = {
 export default function AdminSalesPage() {
   const { user, isLoaded } = useUser(); 
   const navigate = useNavigate(); 
+  const location = useLocation();
+  const [isSidebarVisible, setIsSidebarVisible] = useState(false);
 
   useEffect(() => {
     if (isLoaded && user?.publicMetadata?.role !== 'admin') {
       navigate('/');
     }
   }, [isLoaded, user, navigate]);
+
+  useEffect(() => {
+    setIsSidebarVisible(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 768) { // md breakpoint
+        setIsSidebarVisible(false);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   if (!isLoaded || user?.publicMetadata?.role !== 'admin') {
     return <h1 className="text-center mt-10">Loading...</h1>; 
@@ -149,11 +166,40 @@ export default function AdminSalesPage() {
   });
 
   return (
-    <div className="flex h-screen bg-white">
-      <LeftSideBar />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="flex items-center justify-between px-6 py-4 border-b bg-white shadow-sm">
-          <h1 className="text-2xl font-bold text-gray-800">Admin Dashboard - Sales</h1>
+    <div className="flex h-screen bg-background">
+      <LeftSideBar 
+        isVisible={isSidebarVisible}
+        onToggle={() => setIsSidebarVisible(!isSidebarVisible)}
+      />
+      <div className={`flex-1 flex flex-col overflow-hidden ${isSidebarVisible ? 'blur-sm' : ''}`}>
+        <header className="flex items-center justify-between px-6 py-4 border-b">
+          <h1 className="text-2xl ml-10 font-bold">Sales Management</h1>
+          <div className="flex items-center space-x-4">
+            <Input
+              type="text"
+              placeholder="Search by customer name or order ID"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="flex-1 border border-gray-300 focus:border-blue-500 rounded-md"
+            />
+            <Input
+              type="date"
+              placeholder="Filter by date"
+              value={dateFilter}
+              onChange={(e) => setDateFilter(e.target.value)}
+              className="flex-1 border border-gray-300 focus:border-blue-500 rounded-md"
+            />
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="flex-1 border border-gray-300 focus:border-blue-500 rounded-md h-10 px-3 bg-white"
+            >
+              <option value="">Filter by Status</option>
+              <option value="Pending">Pending</option>
+              <option value="Approved">Approved</option>
+              <option value="Rejected">Rejected</option>
+            </select>
+          </div>
         </header>
         <AnalyticsDashboard />
         <main className="flex-1 overflow-y-auto p-6">
@@ -162,32 +208,6 @@ export default function AdminSalesPage() {
               <CardTitle className="text-lg font-semibold text-gray-700">All Orders</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center gap-4 mb-6">
-                <Input
-                  type="text"
-                  placeholder="Search by customer name or order ID"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="flex-1 border border-gray-300 focus:border-blue-500 rounded-md"
-                />
-                <Input
-                  type="date"
-                  placeholder="Filter by date"
-                  value={dateFilter}
-                  onChange={(e) => setDateFilter(e.target.value)}
-                  className="flex-1 border border-gray-300 focus:border-blue-500 rounded-md"
-                />
-                <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  className="flex-1 border border-gray-300 focus:border-blue-500 rounded-md h-10 px-3 bg-white"
-                >
-                  <option value="">Filter by Status</option>
-                  <option value="Pending">Pending</option>
-                  <option value="Approved">Approved</option>
-                  <option value="Rejected">Rejected</option>
-                </select>
-              </div>
               {isLoading ? (
                 <p className="text-center text-gray-500">Loading orders...</p>
               ) : filteredOrders.length > 0 ? (

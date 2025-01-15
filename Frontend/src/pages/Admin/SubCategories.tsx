@@ -29,7 +29,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react';
 
 interface Category {
@@ -45,24 +45,16 @@ interface SubCategory {
 }
 
 export default function SubCategoryPage() {
-  const { user, isLoaded } = useUser(); 
-  const navigate = useNavigate(); 
-
-  useEffect(() => {
-    if (isLoaded && user?.publicMetadata?.role !== 'admin') {
-      navigate('/'); // Redirect non-admin users
-    }
-  }, [isLoaded, user, navigate]);
-
-  if (!isLoaded || user?.publicMetadata?.role !== 'admin') {
-    return <h1 className="text-center mt-10">Loading...</h1>;
-  }
-
+  const { user, isLoaded } = useUser();
+  const navigate = useNavigate();
+  const location = useLocation();
+  
   const [categories, setCategories] = useState<Category[]>([]);
   const [subCategories, setSubCategories] = useState<SubCategory[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [currentSubCategory, setCurrentSubCategory] = useState<Partial<SubCategory> | null>(null);
+  const [isSidebarVisible, setIsSidebarVisible] = useState(false);
 
   const fetchCategories = async () => {
     try {
@@ -70,6 +62,18 @@ export default function SubCategoryPage() {
       setCategories(response.data);
     } catch (error) {
       console.error('Error fetching categories:', error);
+    }
+  };
+
+  const getProductCountBySubCategory = async (subcategoryID: string): Promise<number> => {
+    try {
+      const response = await axios.get(
+        `http://localhost:3000/api/product/getproductsbycategory/${subcategoryID}`
+      );
+      return response.data.length || 0;
+    } catch (error) {
+      console.error('Error fetching product count:', error);
+      return 0;
     }
   };
 
@@ -88,22 +92,35 @@ export default function SubCategoryPage() {
     }
   };
 
-  const getProductCountBySubCategory = async (subcategoryID: string): Promise<number> => {
-    try {
-      const response = await axios.get(
-        `http://localhost:3000/api/product/getproductsbycategory/${subcategoryID}`
-      );
-      return response.data.length || 0;
-    } catch (error) {
-      console.error('Error fetching product count:', error);
-      return 0;
+  useEffect(() => {
+    if (isLoaded && user?.publicMetadata?.role !== 'admin') {
+      navigate('/');
     }
-  };
+  }, [isLoaded, user, navigate]);
+
+  useEffect(() => {
+    setIsSidebarVisible(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) { // lg breakpoint
+        setIsSidebarVisible(false);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     fetchCategories();
     fetchSubCategories();
   }, []);
+
+  if (!isLoaded || user?.publicMetadata?.role !== 'admin') {
+    return <h1 className="text-center mt-10">Loading...</h1>;
+  }
 
   const handleAddSubCategory = async (newSubCategory: Partial<SubCategory>) => {
     try {
@@ -154,10 +171,13 @@ export default function SubCategoryPage() {
 
   return (
     <div className="flex h-screen bg-background">
-      <LeftSideBar />
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <LeftSideBar 
+        isVisible={isSidebarVisible}
+        onToggle={() => setIsSidebarVisible(!isSidebarVisible)}
+      />
+      <div className={`flex-1 flex flex-col overflow-hidden ${isSidebarVisible ? 'blur-sm' : ''}`}>
         <header className="flex items-center justify-between px-6 py-4 border-b">
-          <h1 className="text-2xl font-bold">SubCategory Management</h1>
+          <h1 className="text-2xl ml-10 font-bold">SubCategory Management</h1>
           <div className="flex items-center space-x-4">
             <form onSubmit={(e) => e.preventDefault()} className="relative">
               <Input

@@ -8,7 +8,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { LayoutDashboard, Package, ListTree, TrendingUp, Bell } from 'lucide-react'
+import { LayoutDashboard, Package, ListTree, TrendingUp, Bell, Menu, X } from 'lucide-react'
 import { useClerk } from '@clerk/clerk-react'
 
 interface NavItemProps {
@@ -61,15 +61,21 @@ const NavItem = ({ item }: { item: NavItemProps }) => {
           <Button
             asChild
             variant={isActive ? "default" : "ghost"}
-            className={`w-full justify-start ${isActive ? " font-medium hover:bg-muted" : ""}`}
+            className={`w-full justify-start text-sm sm:text-base ${
+              isActive 
+                ? "bg-gray-100 text-black font-medium hover:bg-gray-200" 
+                : "text-black/80 hover:bg-gray-100 hover:text-black"
+            }`}
           >
-            <Link to={item.path}>
-              {item.icon}
-              <span className="ml-2">{item.label}</span>
+            <Link to={item.path} className="flex items-center w-full py-2">
+              <span className="flex items-center justify-center w-8">
+                {item.icon}
+              </span>
+              <span className="ml-2 truncate">{item.label}</span>
             </Link>
           </Button>
         </TooltipTrigger>
-        <TooltipContent side="right">
+        <TooltipContent side="right" className="hidden md:block">
           <p>{item.label}</p>
         </TooltipContent>
       </Tooltip>
@@ -79,34 +85,84 @@ const NavItem = ({ item }: { item: NavItemProps }) => {
 
 interface SidebarProps {
   className?: string
+  isVisible?: boolean
+  onToggle?: () => void
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ className }) => {
+const Sidebar: React.FC<SidebarProps> = ({ className, isVisible = false, onToggle }) => {
   const { signOut } = useClerk()
 
   return (
-    <div className={`w-64 flex-col border-r bg-background hidden md:flex ${className}`}>
-      <div className="p-4 text-center ml-14">
-        <img src="/src//assets/LOGO-Babili-3.png" className="w-24" />     
-      </div>
-      <ScrollArea className="flex-1 mt-10">
-        <div className="space-y-1 p-2">
-          <h3 className="mb-2 px-4 text-sm font-semibold tracking-tight">
-            Planning
-          </h3>
-          <nav className="space-y-1">
-            {navigationItems.map((item, index) => (
-              <NavItem key={index} item={item} />
-            ))}
-          </nav>
+    <>
+      {/* Menu Toggle Button - Visible on phones and tablets, hidden on laptops */}
+      <Button
+        variant="ghost"
+        size="icon"
+        className="fixed top-2 left-2 z-50 lg:hidden h-10 w-10"
+        onClick={onToggle}
+        aria-label={isVisible ? "Close menu" : "Open menu"}
+      >
+        {isVisible ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+      </Button>
+
+      {/* Sidebar */}
+      <aside 
+        className={`
+          fixed inset-y-0 left-0 z-40
+          w-[240px] sm:w-[280px] flex flex-col bg-white
+          border-r shadow-lg
+          transition-all duration-300 ease-in-out
+          ${isVisible ? 'translate-x-0' : '-translate-x-full'}
+          lg:translate-x-0 lg:static
+          ${className}
+        `}
+      >
+        <div className="flex flex-col h-full">
+          {/* Logo Section */}
+          <div className="p-3 sm:p-4 text-center border-b flex-shrink-0">
+            <img 
+              src="/src/assets/LOGO-Babili-3.png" 
+              className="w-16 sm:w-24 mx-auto" 
+              alt="Logo" 
+            />     
+          </div>
+
+          {/* Navigation Section */}
+          <ScrollArea className="flex-grow px-2 sm:px-4 py-4">
+            <div className="space-y-1">
+              <h3 className="px-2 text-xs sm:text-sm font-semibold tracking-tight text-black mb-4">
+                Planning
+              </h3>
+              <nav className="space-y-1">
+                {navigationItems.map((item, index) => (
+                  <NavItem key={index} item={item} />
+                ))}
+              </nav>
+            </div>
+          </ScrollArea>
+
+          {/* Logout Section */}
+          <div className="p-3 sm:p-4 border-t mt-auto flex-shrink-0">
+            <Button 
+              variant="outline" 
+              className="w-full text-sm sm:text-base py-2 px-4 text-black hover:text-black/80" 
+              onClick={() => signOut({ redirectUrl: '/' })}
+            >
+              Log out
+            </Button>
+          </div>
         </div>
-      </ScrollArea>
-      <div className="mt-auto p-4">
-        <Button variant="outline" className="w-full" onClick={() => signOut({ redirectUrl: '/' })}>
-            Log out
-        </Button>
-      </div>
-    </div>
+      </aside>
+
+      {/* Overlay - Visible on phones and tablets, hidden on laptops */}
+      {isVisible && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-30 lg:hidden"
+          onClick={onToggle}
+          aria-hidden="true"
+        />
+      )}
+    </>
   )
 }
 

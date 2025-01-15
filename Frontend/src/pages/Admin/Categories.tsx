@@ -33,7 +33,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react';
 
 interface Category {
@@ -53,12 +53,29 @@ interface SubCategory {
 export default function CategoryPage() {
   const { user, isLoaded } = useUser();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [isSidebarVisible, setIsSidebarVisible] = useState(false);
 
   useEffect(() => {
     if (isLoaded && user?.publicMetadata?.role !== 'admin') {
       navigate('/');
     }
   }, [isLoaded, user, navigate]);
+
+  useEffect(() => {
+    setIsSidebarVisible(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 768) { // md breakpoint
+        setIsSidebarVisible(false);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   if (!isLoaded || user?.publicMetadata?.role !== 'admin') {
     return <h1 className="text-center mt-10">Loading...</h1>;
@@ -134,10 +151,13 @@ export default function CategoryPage() {
 
   return (
     <div className="flex h-screen bg-background">
-      <LeftSideBar />
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <LeftSideBar 
+        isVisible={isSidebarVisible}
+        onToggle={() => setIsSidebarVisible(!isSidebarVisible)}
+      />
+      <div className={`flex-1 flex flex-col overflow-hidden ${isSidebarVisible ? 'blur-sm' : ''}`}>
         <header className="flex items-center justify-between px-6 py-4 border-b">
-          <h1 className="text-2xl font-bold">Category Management</h1>
+          <h1 className="text-2xl ml-10 font-bold">Category Management</h1>
           <div className="flex items-center space-x-4">
             <form onSubmit={(e) => e.preventDefault()} className="relative">
               <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
